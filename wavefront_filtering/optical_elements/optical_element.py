@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from wavefront_filtering.wavefronts.wavefront import Wavefront
-
 
 class OpticalElement(ABC):
     '''
@@ -16,7 +14,7 @@ class OpticalElement(ABC):
         super().__init__()
 
     @abstractmethod
-    def apply(self, wavefront: Wavefront):
+    def apply(self):
         '''
         Abstract method to apply optical element.
 
