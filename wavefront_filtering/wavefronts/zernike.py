@@ -1,7 +1,6 @@
-import astropy
-import numpy as np
-from astropy import units as u
 from math import factorial
+
+import numpy as np
 
 from wavefront_filtering.util import get_kronecker_delta
 
@@ -48,7 +47,7 @@ def get_n_m_from_noll(zernike_mode_index: int) -> (int, int):
 
     for index_n in range(nmin, nmax + 1, 1):
         for index_m in range(mmin, mmax + 1, 1):
-            if get_noll_index(index_n, index_m) == zernike_mode_index and (index_n - index_m) % 2 == 0\
+            if get_noll_index(index_n, index_m) == zernike_mode_index and (index_n - index_m) % 2 == 0 \
                     and abs(index_m) <= index_n:
                 return index_n, index_m
 
@@ -76,9 +75,9 @@ def get_radial_zernike_polynomial(index_n: int,
         for index_k in np.arange(0, (index_m - index_m) / 2 + 1, 1):
             index_k = int(index_k)
             radial_part += ((-1) ** index_k * factorial(int(index_n - index_k))) / (
-                        factorial(index_k) * factorial(int((index_n + index_m) / 2 - index_k)) *
-                        factorial(int((index_n - index_m) / 2 - index_k))) *\
-                        (radial_map / maximum_radius) ** (index_n - 2 * index_k)
+                    factorial(index_k) * factorial(int((index_n + index_m) / 2 - index_k)) *
+                    factorial(int((index_n - index_m) / 2 - index_k))) * \
+                           (radial_map / maximum_radius) ** (index_n - 2 * index_k)
 
         return radial_part
 
@@ -111,8 +110,8 @@ def get_zernike_polynomial(zernike_mode_index: int,
     norm = sign * np.sqrt((2 * (index_n + 1)) / (1 + get_kronecker_delta(index_m, 0)))
 
     if index_m >= 0:
-        return norm * get_radial_zernike_polynomial(index_n, index_m, radial_map, maximum_radius) *\
+        return norm * get_radial_zernike_polynomial(index_n, index_m, radial_map, maximum_radius) * \
                np.cos(index_m * angular_map)
     else:
-        return norm * get_radial_zernike_polynomial(index_n, index_m, radial_map, maximum_radius) *\
+        return norm * get_radial_zernike_polynomial(index_n, index_m, radial_map, maximum_radius) * \
                np.sin(abs(index_m) * angular_map)

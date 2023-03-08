@@ -1,6 +1,3 @@
-import astropy
-import numpy as np
-from astropy import units as u
 from numpy.dual import fft2
 from numpy.fft import fftshift
 
@@ -9,12 +6,28 @@ from wavefront_filtering.wavefronts.wavefront import Wavefront
 
 
 class Lens(OpticalElement):
+    '''
+    Class representing a lens, which can be used to transform a wavefront from aperture plane to focal plane or
+    vice-versa.
+    '''
+
     def __init__(self, focal_length):
+        '''
+        Contructor for lens object. Needs a focal length.
+
+                Parameters:
+                        focal_length: Focal length of the lens in meters
+        '''
         self.focal_length = focal_length
         description = f'Lens with focal length {self.focal_length}.'
 
-
     def apply(self, wavefront: Wavefront):
+        '''
+        Implementation of the apply method of the parent class. Used to apply the otpical element to the wavefront.
+
+                Parameters:
+                        wavefront: Wavefront object
+        '''
         wavefront.complex_amplitude = fftshift(fft2(wavefront.complex_amplitude))
 
 # def get_aperture(aperture_diameter: float, pixels_per_dimension: int) -> np.ndarray:
