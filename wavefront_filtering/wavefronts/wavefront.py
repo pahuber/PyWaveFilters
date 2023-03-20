@@ -6,7 +6,22 @@ from wavefront_filtering.optical_elements.optical_element import OpticalElement
 from wavefront_filtering.wavefronts.zernike import get_zernike_polynomial
 
 
-class Wavefront:
+class BaseWavefront:
+    '''
+    Base class to represent wavefronts.
+    '''
+
+    def __init__(self):
+        self.complex_amplitude = None
+
+    def apply(self, optical_element: OpticalElement):
+        '''
+        Apply an optical element.
+        '''
+        optical_element.apply(self)
+
+
+class Wavefront(BaseWavefront):
     '''
     Class representing a wavefront.
     '''
@@ -34,8 +49,8 @@ class Wavefront:
         self.array_dimension = array_dimension
 
         self.aperture_function = self.get_aperture_function()
-        self.wavefront_error = self.get_wavefront_error()
-        self.complex_amplitude = self.get_complex_amplitude()
+        self.initial_wavefront_error = self.get_wavefront_error()
+        self.complex_amplitude = self.get_initial_complex_amplitude()
 
     @property
     def wavelength(self) -> float:
@@ -123,6 +138,16 @@ class Wavefront:
         '''
         return abs(self.complex_amplitude) ** 2
 
+    def __add__(self, other_wavefront):
+        if (self.aperture_diameter == other_wavefront.aperture_diameter and
+                self.array_dimension == other_wavefront.array_dimension):
+
+            complex_amplitude_sum = self.complex_amplitude + other_wavefront.complex_amplitude
+            
+            return CombinedWavefront(complex_amplitude_sum)
+        else:
+            raise ValueError('Wavefronts must have identical aperture diameter and array dimensions')
+
     def get_aperture_function(self) -> np.ndarray:
         '''
         Return an array containing a circular aperture.
@@ -130,8 +155,9 @@ class Wavefront:
                 Returns:
                         Array containing circular aperture.
         '''
-        extent = np.linspace(-self.aperture_diameter * 2, self.aperture_diameter * 2, self.array_dimension)
-        self._x_map, self._y_map = np.meshgrid(extent, extent)
+        self.extent = 15 * self.aperture_diameter
+        extent_linear_space = np.linspace(-self.extent, self.extent, self.array_dimension)
+        self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         self._aperture_radius = self.aperture_diameter / 2
 
         return self.initial_amplitude * (self._x_map ** 2 + self._y_map ** 2 < self._aperture_radius ** 2).astype(
@@ -158,17 +184,16 @@ class Wavefront:
                                                                          self._aperture_radius)
         return wavefront_error
 
-    def get_complex_amplitude(self) -> np.ndarray:
+    def get_initial_complex_amplitude(self) -> np.ndarray:
         '''
         Return an array containing the complex amplitude of the wavefront.
 
                 Returns:
                         Array containing the complex amplitude.
         '''
-        return self.aperture_function * np.exp(-2 * np.pi * 1j * self.wavefront_error / self.wavelength)
+        return self.aperture_function * np.exp(-2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
 
-    def apply(self, optical_element: OpticalElement):
-        '''
-        Apply an optical element.
-        '''
-        optical_element.apply(self)
+
+class CombinedWavefront(BaseWavefront):
+    def __init__(self, complex_amplitude: np.ndarray):
+        self.complex_amplitude = complex_amplitude
