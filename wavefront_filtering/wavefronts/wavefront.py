@@ -14,6 +14,9 @@ class BaseWavefront:
     def __init__(self):
         self.complex_amplitude = None
 
+    def __add__(self, other_wavefront):
+        return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude)
+
     def apply(self, optical_element: OpticalElement):
         '''
         Apply an optical element.
@@ -137,16 +140,6 @@ class Wavefront(BaseWavefront):
                         Array containing intensity
         '''
         return abs(self.complex_amplitude) ** 2
-
-    def __add__(self, other_wavefront):
-        if (self.aperture_diameter == other_wavefront.aperture_diameter and
-                self.array_dimension == other_wavefront.array_dimension):
-
-            complex_amplitude_sum = self.complex_amplitude + other_wavefront.complex_amplitude
-            
-            return CombinedWavefront(complex_amplitude_sum)
-        else:
-            raise ValueError('Wavefronts must have identical aperture diameter and array dimensions')
 
     def get_aperture_function(self) -> np.ndarray:
         '''
