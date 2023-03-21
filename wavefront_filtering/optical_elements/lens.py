@@ -10,17 +10,15 @@ class Lens(OpticalElement):
     vice-versa.
     '''
 
-    def __init__(self, focal_length: float, inverse: bool = False):
+    def __init__(self, focal_length: float):
         '''
         Constructor for lens object. Needs a focal length.
 
                 Parameters:
                         focal_length: Focal length of the lens in meters
-                        inverse: Whether to inverse Fourier transform or not
         '''
         self.focal_length = focal_length
         description = f'Lens with focal length {self.focal_length}.'
-        self.inverse = inverse
 
     def apply(self, wavefront: BaseWavefront):
         '''
@@ -29,9 +27,11 @@ class Lens(OpticalElement):
                 Parameters:
                         wavefront: Wavefront object
         '''
-        if not self.inverse:
+        if not wavefront.is_spatial_domain:
             wavefront.complex_amplitude = fftshift(fft2(wavefront.complex_amplitude))
+            wavefront.is_spatial_domain = False
         else:
             wavefront.complex_amplitude = fftshift(ifft2(wavefront.complex_amplitude))
+            wavefront.is_spatial_domain = True
 
     # TODO: add validation

@@ -13,9 +13,13 @@ class BaseWavefront:
 
     def __init__(self):
         self.complex_amplitude = None
+        self.is_spatial_domain = None
 
     def __add__(self, other_wavefront):
-        return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude)
+        if self.is_spatial_domain == other_wavefront.is_spatial_domain:
+            return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude)
+        else:
+            raise ValueError('Wavefronts must both be in spatial or in frequency domain')
 
     def apply(self, optical_element: OpticalElement):
         '''
@@ -54,6 +58,7 @@ class Wavefront(BaseWavefront):
         self.aperture_function = self.get_aperture_function()
         self.initial_wavefront_error = self.get_wavefront_error()
         self.complex_amplitude = self.get_initial_complex_amplitude()
+        self.is_spatial_domain = True
 
     @property
     def wavelength(self) -> float:
@@ -188,5 +193,6 @@ class Wavefront(BaseWavefront):
 
 
 class CombinedWavefront(BaseWavefront):
-    def __init__(self, complex_amplitude: np.ndarray):
+    def __init__(self, complex_amplitude: np.ndarray, is_spatial_domain: bool):
         self.complex_amplitude = complex_amplitude
+        self.is_spatial_domain = is_spatial_domain
