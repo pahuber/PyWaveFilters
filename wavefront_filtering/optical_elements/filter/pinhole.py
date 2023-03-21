@@ -1,7 +1,6 @@
 import astropy
 import numpy as np
 from astropy import units as u
-from matplotlib import pyplot as plt
 
 from wavefront_filtering.optical_elements.optical_element import OpticalElement
 from wavefront_filtering.wavefronts.wavefront import Wavefront, BaseWavefront
@@ -55,9 +54,6 @@ class Pinhole(OpticalElement):
                              self.wavefront.array_dimension)
         x_map, y_map = np.meshgrid(extent, extent)
         aperture_radius = self.wavefront.wavelength / self.wavefront.aperture_diameter * 1.22 * u.meter
-        print(aperture_radius)
-        plt.imshow(abs(x_map ** 2 + y_map ** 2 < aperture_radius ** 2) ** 2)
-        plt.show()
         return x_map ** 2 + y_map ** 2 < aperture_radius ** 2
 
     def apply(self, wavefront: BaseWavefront):

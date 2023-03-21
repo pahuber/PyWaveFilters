@@ -27,11 +27,11 @@ class Lens(OpticalElement):
                 Parameters:
                         wavefront: Wavefront object
         '''
-        if not wavefront.is_spatial_domain:
+        if wavefront.is_spatial_domain:
             wavefront.complex_amplitude = fftshift(fft2(wavefront.complex_amplitude))
             wavefront.is_spatial_domain = False
         else:
-            wavefront.complex_amplitude = fftshift(ifft2(wavefront.complex_amplitude))
+            wavefront.complex_amplitude = ifft2(wavefront.complex_amplitude)
             wavefront.is_spatial_domain = True
 
     # TODO: add validation
