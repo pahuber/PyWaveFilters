@@ -12,10 +12,21 @@ class BaseWavefront:
     '''
 
     def __init__(self):
+        '''
+        Constructor for base wavefront object.
+        '''
         self.complex_amplitude = None
         self.is_spatial_domain = None
 
     def __add__(self, other_wavefront):
+        '''
+        Method to add two base wavefront together.
+
+                Parameters:
+                        other_wavefront: Base wavefront object to be added
+                Returns:
+                        Cmobined wavefront object
+        '''
         if self.is_spatial_domain == other_wavefront.is_spatial_domain:
             return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude)
         else:
@@ -193,6 +204,13 @@ class Wavefront(BaseWavefront):
 
 
 class CombinedWavefront(BaseWavefront):
+    '''
+    Base class representing combined wdavefronts.
+    '''
+
     def __init__(self, complex_amplitude: np.ndarray, is_spatial_domain: bool):
+        '''
+        Constructor to create combined wavefront objects.
+        '''
         self.complex_amplitude = complex_amplitude
         self.is_spatial_domain = is_spatial_domain
