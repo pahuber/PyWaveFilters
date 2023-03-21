@@ -205,7 +205,7 @@ class Wavefront(BaseWavefront):
 
 class CombinedWavefront(BaseWavefront):
     '''
-    Base class representing combined wdavefronts.
+    Base class representing combined wavefronts.
     '''
 
     def __init__(self, complex_amplitude: np.ndarray, is_spatial_domain: bool):
