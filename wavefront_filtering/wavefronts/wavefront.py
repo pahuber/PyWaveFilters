@@ -18,7 +18,8 @@ class BaseWavefront:
         self.complex_amplitude = None
         self.is_pupil_plane = None
         self.array_width_pupil_plane = None
-        self.array_width_focal_plane = None
+        self.array_width_focal_plane_dimensionless = None
+        self.array_width_focal_plane_length = None  # Is reset to None after leaving the focal plane
         self._length_per_pixel = 300e-6 * u.meter
 
     def __add__(self, other_wavefront):
@@ -34,7 +35,8 @@ class BaseWavefront:
             return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude,
                                      self.is_pupil_plane,
                                      self.array_width_pupil_plane,
-                                     self.array_width_focal_plane)
+                                     self.array_width_focal_plane_dimensionless,
+                                     self.array_width_focal_plane_length)
         else:
             raise ValueError('Wavefronts must both be in spatial or in frequency domain')
 
@@ -74,7 +76,7 @@ class Wavefront(BaseWavefront):
         self.array_dimension = number_of_pixels
 
         self.array_width_pupil_plane = number_of_pixels * self._length_per_pixel
-        self.array_width_focal_plane = aperture_diameter / self._length_per_pixel
+        self.array_width_focal_plane_dimensionless = aperture_diameter / self._length_per_pixel
         self.aperture_function = self.get_aperture_function()
         self.initial_wavefront_error = self.get_wavefront_error()
         self.complex_amplitude = self.get_initial_complex_amplitude()
@@ -221,17 +223,20 @@ class CombinedWavefront(BaseWavefront):
                  complex_amplitude: np.ndarray,
                  is_pupil_plane: bool,
                  array_width_pupil_plane: float,
-                 array_width_focal_plane: float):
+                 array_width_focal_plane_dimensionless: float,
+                 array_width_focal_plane_length: float):
         '''
         Constructor for combined wavefront object.
 
                 Parameters:
                         complex_amplitude: Complex amplitude of the combined wavefront
                         is_pupil_plane: Boolean specifying whether we are in the spatial domain or not
-                        array_width_pupil_plane: Array with in pupil plane
-                        array_width_focal_plane: Array with in focal plane
+                        array_width_pupil_plane: Array width in pupil plane
+                        array_width_focal_plane_dimensionless: Array width in focal plane dimensionless
+                        array_width_focal_plane_length: Array width in focal plane in units of lenth
         '''
         self.complex_amplitude = complex_amplitude
         self.is_pupil_plane = is_pupil_plane
         self.array_width_pupil_plane = array_width_pupil_plane
-        self.array_width_focal_plane = array_width_focal_plane
+        self.array_width_focal_plane_dimensionless = array_width_focal_plane_dimensionless
+        self.array_width_focal_plane_length = array_width_focal_plane_length
