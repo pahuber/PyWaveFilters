@@ -17,6 +17,9 @@ class BaseWavefront:
         '''
         self.complex_amplitude = None
         self.is_spatial_domain = None
+        self.array_width_pupil_plane = None
+        self.array_width_focal_plane = None
+        self._length_per_pixel = 300e-6 * u.meter
 
     def __add__(self, other_wavefront):
         '''
@@ -25,10 +28,13 @@ class BaseWavefront:
                 Parameters:
                         other_wavefront: Base wavefront object to be added
                 Returns:
-                        Cmobined wavefront object
+                        Combined wavefront object
         '''
         if self.is_spatial_domain == other_wavefront.is_spatial_domain:
-            return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude)
+            return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude,
+                                     self.is_spatial_domain,
+                                     self.array_width_pupil_plane,
+                                     self.array_width_focal_plane)
         else:
             raise ValueError('Wavefronts must both be in spatial or in frequency domain')
 
@@ -49,7 +55,7 @@ class Wavefront(BaseWavefront):
                  initial_amplitude: float,
                  zernike_modes: list,
                  aperture_diameter: float,
-                 array_dimension: int):
+                 number_of_pixels: int):
         '''
         Constructor for wavefront object.
 
@@ -58,14 +64,17 @@ class Wavefront(BaseWavefront):
                         initial_amplitude: Initial amplitude of the wavefront in sqrt(watts)/meter
                         zernike_modes: List containing the zernike mode indices and their coefficients in meters
                         aperture_diameter: Aperture diameter in the aperture plane in meters
-                        array_dimension: Side length of the output array in pixels
+                        number_of_pixels: Side length of the output array in pixels (1 pixel =^ 300 um)
         '''
+        BaseWavefront.__init__(self)
         self.wavelength = wavelength
         self.initial_amplitude = initial_amplitude
         self.zernike_modes = zernike_modes
         self.aperture_diameter = aperture_diameter
-        self.array_dimension = array_dimension
+        self.array_dimension = number_of_pixels
 
+        self.array_width_pupil_plane = number_of_pixels * self._length_per_pixel
+        self.array_width_focal_plane = aperture_diameter / self._length_per_pixel
         self.aperture_function = self.get_aperture_function()
         self.initial_wavefront_error = self.get_wavefront_error()
         self.complex_amplitude = self.get_initial_complex_amplitude()
@@ -164,8 +173,8 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing circular aperture.
         '''
-        self.extent = 15 * self.aperture_diameter
-        extent_linear_space = np.linspace(-self.extent, self.extent, self.array_dimension)
+        extent = self.array_dimension / 2 * self._length_per_pixel
+        extent_linear_space = np.linspace(-extent, extent, self.array_dimension)
         self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         self._aperture_radius = self.aperture_diameter / 2
 
@@ -208,9 +217,15 @@ class CombinedWavefront(BaseWavefront):
     Base class representing combined wavefronts.
     '''
 
-    def __init__(self, complex_amplitude: np.ndarray, is_spatial_domain: bool):
+    def __init__(self,
+                 complex_amplitude: np.ndarray,
+                 is_spatial_domain: bool,
+                 array_width_pupil_plane: float,
+                 array_width_focal_plane: float):
         '''
         Constructor to create combined wavefront objects.
         '''
         self.complex_amplitude = complex_amplitude
         self.is_spatial_domain = is_spatial_domain
+        self.array_width_pupil_plane = array_width_pupil_plane
+        self.array_width_focal_plane = array_width_focal_plane

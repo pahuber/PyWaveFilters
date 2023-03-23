@@ -9,26 +9,26 @@ from wavefront_filtering.wavefronts.wavefront import Wavefront
 wavelength = 1e-5 * u.meter
 initial_intensity = 1 * u.watt ** 0.5 / u.meter
 zernike_modes = [(5, 0 * wavelength / 10)]
-aperture_diameter = 0.01 * u.meter
-array_dimension = 400
+aperture_diameter = 0.003 * u.meter
+number_of_pixels = 1000
 
 wavefront = Wavefront(wavelength,
                       initial_intensity,
                       zernike_modes,
                       aperture_diameter,
-                      array_dimension)
+                      number_of_pixels)
 
 # Plot complex amplitude of wavefront in aperture plane
+extent_pupil = wavefront.array_width_pupil_plane.value / 2
 plt.imshow(abs((wavefront.complex_amplitude.value) ** 2),
-           extent=[-wavefront.extent.value, wavefront.extent.value, -wavefront.extent.value,
-                   wavefront.extent.value])
+           extent=[-extent_pupil, extent_pupil, -extent_pupil, extent_pupil])
 plt.xlabel('$x$ (m)')
 plt.ylabel('$y$ (m)')
 plt.title('Wavefront in Aperture Plane')
 plt.colorbar()
 plt.show()
 
-# # Plot wavefront error phase map
+# Plot wavefront error phase map
 plt.imshow(abs(wavefront.initial_wavefront_error.value) ** 2)
 plt.title('Wavefront Phase Map')
 plt.colorbar()
@@ -39,8 +39,12 @@ lens = Lens(100)
 wavefront.apply(lens)
 
 # Plot wavefront in focal plane
-plt.imshow(abs((wavefront.complex_amplitude.value) ** 2))
+extent_focal = wavefront.array_width_focal_plane / 2
+plt.imshow(abs((wavefront.complex_amplitude.value) ** 2),
+           extent=[-extent_focal, extent_focal, -extent_focal, extent_focal])
 plt.title('Wavefront in Focal Plane')
+plt.xlabel('$\lambda/D$')
+plt.ylabel('$\lambda/D$')
 plt.colorbar()
 plt.show()
 
@@ -49,8 +53,11 @@ pinhole = Pinhole(0.03 / u.meter, wavefront)
 wavefront.apply(pinhole)
 
 # Plot filtered wavefront in focal plane
-plt.imshow(abs((wavefront.complex_amplitude.value) ** 2))
+plt.imshow(abs((wavefront.complex_amplitude.value) ** 2),
+           extent=[-extent_focal, extent_focal, -extent_focal, extent_focal])
 plt.title('Filtered Wavefront in Focal Plane')
+plt.xlabel('$\lambda/D$')
+plt.ylabel('$\lambda/D$')
 plt.colorbar()
 plt.show()
 
@@ -59,7 +66,10 @@ lens2 = Lens(100)
 wavefront.apply(lens2)
 
 # Plot wavefront in output plane
-plt.imshow(abs((wavefront.complex_amplitude.value) ** 2))
+plt.imshow(abs((wavefront.complex_amplitude.value) ** 2),
+           extent=[-extent_pupil, extent_pupil, -extent_pupil, extent_pupil])
 plt.title('Wavefront in Output Aperture Plane')
+plt.xlabel('$x$ (m)')
+plt.ylabel('$y$ (m)')
 plt.colorbar()
 plt.show()
