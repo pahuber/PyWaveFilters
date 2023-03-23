@@ -11,37 +11,37 @@ class Pinhole(OpticalElement):
     Class representing a pinhole, which can be used to filter a wavefront in the focal plane.
     '''
 
-    def __init__(self, aperture_diameter: float, wavefront: Wavefront):
+    def __init__(self, aperture_radius: float, wavefront: Wavefront):
         '''
         Constructor for pinhole object. Needs a aperture diameter.
 
                 Parameters:
-                        aperture_diameter: Aperture diameter pinhole in 1/meters
+                        aperture_radius: Pinhole radius in wavelength/aperture diameter
                         wavefront: Wavefront object
         '''
-        self.aperture_diameter = aperture_diameter
+        self.aperture_radius = aperture_radius
         self.wavefront = wavefront
-        description = f'Pinhole with aperture diameter {self.aperture_diameter}.'
+        description = f'Pinhole with aperture diameter {self.aperture_radius}.'
         self.aperture_function = self.get_aperture_function()
 
     @property
-    def aperture_diameter(self) -> float:
+    def aperture_radius(self) -> float:
         '''
-        Return the aperture diameter.
+        Return the aperture radius.
 
                 Returns:
-                        Float corresponding to aperture diameter
+                        Float corresponding to aperture radius
         '''
-        return self._aperture_diameter
+        return self._aperture_radius
 
-    @aperture_diameter.setter
-    def aperture_diameter(self, value):
+    @aperture_radius.setter
+    def aperture_radius(self, value):
         '''
-        Setter method for the aperture diameter.
+        Setter method for the aperture radius.
         '''
-        if not (type(value) == astropy.units.quantity.Quantity and value.unit == 1 / u.meter):
-            raise ValueError(f'Units of pinhole aperture diameter must be specified in 1/meters.')
-        self._aperture_diameter = value
+        if (type(value) == astropy.units.quantity.Quantity and value.unit == u.meter):
+            raise ValueError(f'Units of pinhole aperture radius must be specified in dimensionless lambda/D.')
+        self._aperture_radius = value
 
     def get_aperture_function(self) -> np.ndarray:
         '''
@@ -50,11 +50,11 @@ class Pinhole(OpticalElement):
                 Returns:
                         Array containing circular aperture.
         '''
-        extent = np.linspace(-self.wavefront.aperture_diameter, self.wavefront.aperture_diameter,
-                             self.wavefront.array_dimension)
-        x_map, y_map = np.meshgrid(extent, extent)
-        aperture_radius = self.wavefront.wavelength / self.wavefront.aperture_diameter * 1.22 * u.meter
-        return x_map ** 2 + y_map ** 2 < aperture_radius ** 2
+        extent = self.wavefront.array_width_focal_plane / 2
+        extent_linear_space = np.linspace(-extent, extent,
+                                          self.wavefront.array_dimension)
+        x_map, y_map = np.meshgrid(extent_linear_space, extent_linear_space)
+        return x_map ** 2 + y_map ** 2 < self.aperture_radius ** 2
 
     def apply(self, wavefront: BaseWavefront):
         '''
