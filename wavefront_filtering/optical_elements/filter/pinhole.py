@@ -66,7 +66,7 @@ class Pinhole(OpticalElement):
         if not (self.wavefront == wavefront):
             raise Exception('Pinhole must be applied to the same wavefront that was used to initialize it')
         else:
-            if not wavefront.is_spatial_domain:
+            if not wavefront.is_pupil_plane:
                 wavefront.complex_amplitude *= self.aperture_function
             else:
                 raise Exception('Pinholes can only be applied to wavefronts in the frequency domain')

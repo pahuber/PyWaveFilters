@@ -16,7 +16,7 @@ class BaseWavefront:
         Constructor for base wavefront object.
         '''
         self.complex_amplitude = None
-        self.is_spatial_domain = None
+        self.is_pupil_plane = None
         self.array_width_pupil_plane = None
         self.array_width_focal_plane = None
         self._length_per_pixel = 300e-6 * u.meter
@@ -30,9 +30,9 @@ class BaseWavefront:
                 Returns:
                         Combined wavefront object
         '''
-        if self.is_spatial_domain == other_wavefront.is_spatial_domain:
+        if self.is_pupil_plane == other_wavefront.is_pupil_plane:
             return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude,
-                                     self.is_spatial_domain,
+                                     self.is_pupil_plane,
                                      self.array_width_pupil_plane,
                                      self.array_width_focal_plane)
         else:
@@ -78,7 +78,7 @@ class Wavefront(BaseWavefront):
         self.aperture_function = self.get_aperture_function()
         self.initial_wavefront_error = self.get_wavefront_error()
         self.complex_amplitude = self.get_initial_complex_amplitude()
-        self.is_spatial_domain = True
+        self.is_pupil_plane = True
 
     @property
     def wavelength(self) -> float:
@@ -219,13 +219,19 @@ class CombinedWavefront(BaseWavefront):
 
     def __init__(self,
                  complex_amplitude: np.ndarray,
-                 is_spatial_domain: bool,
+                 is_pupil_plane: bool,
                  array_width_pupil_plane: float,
                  array_width_focal_plane: float):
         '''
-        Constructor to create combined wavefront objects.
+        Constructor for combined wavefront object.
+
+                Parameters:
+                        complex_amplitude: Complex amplitude of the combined wavefront
+                        is_pupil_plane: Boolean specifying whether we are in the spatial domain or not
+                        array_width_pupil_plane: Array with in pupil plane
+                        array_width_focal_plane: Array with in focal plane
         '''
         self.complex_amplitude = complex_amplitude
-        self.is_spatial_domain = is_spatial_domain
+        self.is_pupil_plane = is_pupil_plane
         self.array_width_pupil_plane = array_width_pupil_plane
         self.array_width_focal_plane = array_width_focal_plane
