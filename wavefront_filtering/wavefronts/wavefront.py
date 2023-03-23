@@ -223,7 +223,13 @@ class CombinedWavefront(BaseWavefront):
                  array_width_pupil_plane: float,
                  array_width_focal_plane: float):
         '''
-        Constructor to create combined wavefront objects.
+        Constructor for wavefront object.
+
+                Parameters:
+                        complex_amplitude: Complex amplitude of the combined wavefront
+                        is_spatial_domain: Boolean specifying whether we are in the spatial domain or not
+                        array_width_pupil_plane: Array with in pupil plane
+                        array_width_focal_plane: Array with in focal plane
         '''
         self.complex_amplitude = complex_amplitude
         self.is_spatial_domain = is_spatial_domain
