@@ -10,7 +10,7 @@ class OpticalElement(ABC):
         '''
         Abstract contructor for optical element object.
         '''
-        description = 'Optical element.'
+        self.description = 'Optical element.'
         super().__init__()
 
     @abstractmethod

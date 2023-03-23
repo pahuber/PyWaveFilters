@@ -20,7 +20,7 @@ class Lens(OpticalElement):
                         focal_length: Focal length of the lens in meters
         '''
         self.focal_length = focal_length
-        description = f'Lens with focal length {self.focal_length}.'
+        self.description = f'Lens with focal length {self.focal_length}.'
 
     @property
     def focal_length(self) -> float:

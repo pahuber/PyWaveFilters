@@ -21,7 +21,7 @@ class Pinhole(OpticalElement):
         '''
         self.aperture_radius = aperture_radius
         self.wavefront = wavefront
-        description = f'Pinhole with aperture diameter {self.aperture_radius}.'
+        self.description = f'Pinhole with aperture diameter {self.aperture_radius}.'
         self.aperture_function = self.get_aperture_function()
 
     @property
