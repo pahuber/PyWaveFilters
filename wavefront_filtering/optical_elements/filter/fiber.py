@@ -108,11 +108,12 @@ class Fiber(OpticalElement):
         return fundamental_fiber_mode
 
     def get_coupling_efficiency(self):
-        coupling_efficiency = np.sum(
-            abs(self.fundamental_fiber_mode.conjugate() * self.wavefront.complex_amplitude) ** 2) / (
+        coupling_efficiency = abs(
+            np.sum(self.fundamental_fiber_mode.conjugate() * self.wavefront.complex_amplitude)) ** 2 / (
                                       np.sum(abs(self.fundamental_fiber_mode) ** 2) * np.sum(
                                   abs(self.wavefront.complex_amplitude) ** 2))
         # TODO: check coupling efficiency definition
+        # TODO: fix coupling efficiency dependent on number of pixels
         if coupling_efficiency <= 0.7:
             warnings.warn(f'Coupling efficiency is only {coupling_efficiency * 100} %')
         if coupling_efficiency > 0.85:
