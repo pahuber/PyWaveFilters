@@ -57,5 +57,3 @@ class Lens(OpticalElement):
             wavefront.complex_amplitude = ifft2(wavefront.complex_amplitude)
             wavefront.is_pupil_plane = True
             wavefront.array_width_focal_plane_length = None
-
-    # TODO: add validation
