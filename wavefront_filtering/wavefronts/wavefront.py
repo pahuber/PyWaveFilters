@@ -20,6 +20,7 @@ class BaseWavefront:
         self.array_width_pupil_plane = None
         self.array_width_focal_plane_dimensionless = None
         self.array_width_focal_plane_length = None  # Is reset to None after leaving the focal plane
+        self.number_of_pixels = None
         self._length_per_pixel = 300e-6 * u.meter
 
     def __add__(self, other_wavefront):
@@ -36,7 +37,8 @@ class BaseWavefront:
                                      self.is_pupil_plane,
                                      self.array_width_pupil_plane,
                                      self.array_width_focal_plane_dimensionless,
-                                     self.array_width_focal_plane_length)
+                                     self.array_width_focal_plane_length,
+                                     self.number_of_pixels)
         else:
             raise ValueError('Wavefronts must both be in spatial or in frequency domain')
 
@@ -73,7 +75,7 @@ class Wavefront(BaseWavefront):
         self.initial_amplitude = initial_amplitude
         self.zernike_modes = zernike_modes
         self.aperture_diameter = aperture_diameter
-        self.array_dimension = number_of_pixels
+        self.number_of_pixels = number_of_pixels
 
         self.array_width_pupil_plane = number_of_pixels * self._length_per_pixel
         self.array_width_focal_plane_dimensionless = aperture_diameter / self._length_per_pixel
@@ -140,7 +142,7 @@ class Wavefront(BaseWavefront):
         self._aperture_diameter = value
 
     @property
-    def array_dimension(self) -> int:
+    def number_of_pixels(self) -> int:
         '''
         Return the array dimension.
 
@@ -149,8 +151,8 @@ class Wavefront(BaseWavefront):
         '''
         return self._array_dimension
 
-    @array_dimension.setter
-    def array_dimension(self, value):
+    @number_of_pixels.setter
+    def number_of_pixels(self, value):
         '''
         Setter method for the array dimension.
         '''
@@ -175,8 +177,8 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing circular aperture.
         '''
-        extent = self.array_dimension / 2 * self._length_per_pixel
-        extent_linear_space = np.linspace(-extent, extent, self.array_dimension)
+        extent = self.number_of_pixels / 2 * self._length_per_pixel
+        extent_linear_space = np.linspace(-extent, extent, self.number_of_pixels)
         self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         self._aperture_radius = self.aperture_diameter / 2
 
@@ -224,7 +226,8 @@ class CombinedWavefront(BaseWavefront):
                  is_pupil_plane: bool,
                  array_width_pupil_plane: float,
                  array_width_focal_plane_dimensionless: float,
-                 array_width_focal_plane_length: float):
+                 array_width_focal_plane_length: float,
+                 number_of_pixels: int):
         '''
         Constructor for combined wavefront object.
 
@@ -234,9 +237,11 @@ class CombinedWavefront(BaseWavefront):
                         array_width_pupil_plane: Array width in pupil plane
                         array_width_focal_plane_dimensionless: Array width in focal plane dimensionless
                         array_width_focal_plane_length: Array width in focal plane in units of lenth
+                        number_of_pixels: Number of pixels in array
         '''
         self.complex_amplitude = complex_amplitude
         self.is_pupil_plane = is_pupil_plane
         self.array_width_pupil_plane = array_width_pupil_plane
         self.array_width_focal_plane_dimensionless = array_width_focal_plane_dimensionless
         self.array_width_focal_plane_length = array_width_focal_plane_length
+        self.number_of_pixels = number_of_pixels
