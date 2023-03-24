@@ -52,7 +52,7 @@ class Pinhole(OpticalElement):
         '''
         extent = self.wavefront.array_width_focal_plane_dimensionless / 2
         extent_linear_space = np.linspace(-extent, extent,
-                                          self.wavefront.array_dimension)
+                                          self.wavefront.number_of_pixels)
         x_map, y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         return x_map ** 2 + y_map ** 2 < self.aperture_radius ** 2
 
