@@ -92,7 +92,7 @@ class Fiber(OpticalElement):
         # TODO: add normalization
 
         extent = self.wavefront.array_width_focal_plane_dimensionless * self.lens.focal_length / 2
-        extent_linear_space = np.linspace(-extent, extent, self.wavefront.array_dimension)
+        extent_linear_space = np.linspace(-extent, extent, self.wavefront.number_of_pixels)
         X, Y = np.meshgrid(extent_linear_space, extent_linear_space)
 
         angles = np.arctan2(Y, X)
@@ -129,5 +129,6 @@ class Fiber(OpticalElement):
         else:
             if not wavefront.is_pupil_plane:
                 wavefront.complex_amplitude = self.fundamental_fiber_mode * self.coupling_efficiency
+                wavefront.is_fiber_applied = True
             else:
                 raise Exception('Fibers can only be applied to wavefronts in the focal plane')

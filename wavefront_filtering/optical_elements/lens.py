@@ -54,6 +54,10 @@ class Lens(OpticalElement):
             wavefront.array_width_focal_plane_length = wavefront.array_width_focal_plane_dimensionless * \
                                                        self.focal_length
         else:
-            wavefront.complex_amplitude = ifft2(wavefront.complex_amplitude)
+            if wavefront.is_fiber_applied:
+                wavefront.complex_amplitude = fftshift(ifft2(wavefront.complex_amplitude))
+                wavefront.is_fiber_applied = None
+            else:
+                wavefront.complex_amplitude = ifft2(wavefront.complex_amplitude)
             wavefront.is_pupil_plane = True
             wavefront.array_width_focal_plane_length = None
