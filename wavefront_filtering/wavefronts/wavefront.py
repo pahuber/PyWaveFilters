@@ -21,8 +21,10 @@ class BaseWavefront:
         self.array_width_focal_plane_dimensionless = None
         self.array_width_focal_plane_length = None  # Is reset to None after leaving the focal plane
         self.number_of_pixels = 1
-        self.is_fiber_applied = None
+        self.has_fiber_been_applied = None
         self._length_per_pixel = 300e-6 * u.meter
+        self.aperture_diameter = 1 * u.meter  # TODO: implement correctly
+        self.wavelength = 1 * u.meter  # TODO: implement correctly
 
     def __add__(self, other_wavefront):
         '''
@@ -40,7 +42,7 @@ class BaseWavefront:
                                      self.array_width_focal_plane_dimensionless,
                                      self.array_width_focal_plane_length,
                                      self.number_of_pixels,
-                                     self.is_fiber_applied)
+                                     self.has_fiber_been_applied)
         else:
             raise ValueError('Wavefronts must both be in pupil or in focal plane')
 
