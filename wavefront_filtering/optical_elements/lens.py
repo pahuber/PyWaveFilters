@@ -55,6 +55,7 @@ class Lens(OpticalElement):
             wavefront.extent_focal_plane_meters = wavefront.extent_focal_plane_dimensionless / \
                                                   wavefront.beam_diameter * self.focal_length * \
                                                   wavefront.wavelength
+            # TODO: implement method to calculate focal plane extent in meters
         else:
             if wavefront.has_fiber_been_applied:
                 wavefront.complex_amplitude = fftshift(ifft2(wavefront.complex_amplitude))
