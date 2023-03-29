@@ -101,8 +101,7 @@ class Fiber(OpticalElement):
                                         (np.sqrt(self.v_number).value, np.sqrt(self.v_number).value),
                                         self.v_number.value)
 
-        extent = self.wavefront.extent_focal_plane_dimensionless * self.lens.focal_length / \
-                 self.wavefront.beam_diameter * self.wavefront.wavelength / 2
+        extent = self.lens.get_extent_focal_plane_meters() / 2
         extent_linear_space = np.linspace(-extent, extent, self.wavefront.number_of_pixels)
         X, Y = np.meshgrid(extent_linear_space, extent_linear_space)
 
