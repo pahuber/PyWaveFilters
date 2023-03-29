@@ -46,13 +46,15 @@ class Lens(OpticalElement):
         Implementation of the apply method of the parent class. Used to apply the optical element to the wavefront.
 
                 Parameters:
-                        wavefront: Wavefront object
+                        wavefront: Base wavefront object
         '''
         if wavefront.is_pupil_plane:
+            wavefront.complex_amplitude = fftshift(wavefront.complex_amplitude)  # TODO: double check this shift
             wavefront.complex_amplitude = fftshift(fft2(wavefront.complex_amplitude))
             wavefront.is_pupil_plane = False
-            wavefront.array_width_focal_plane_length = wavefront.array_width_focal_plane_dimensionless * \
-                                                       self.focal_length
+            wavefront.array_width_focal_plane_length = wavefront.array_width_focal_plane_dimensionless / \
+                                                       wavefront.aperture_diameter * self.focal_length * \
+                                                       wavefront.wavelength
         else:
             if wavefront.has_fiber_been_applied:
                 wavefront.complex_amplitude = fftshift(ifft2(wavefront.complex_amplitude))
