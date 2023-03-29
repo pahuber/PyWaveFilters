@@ -50,7 +50,7 @@ class Pinhole(OpticalElement):
                 Returns:
                         Array containing circular aperture.
         '''
-        extent = self.wavefront.array_width_focal_plane_dimensionless / 2
+        extent = self.wavefront.extent_focal_plane_dimensionless / 2
         extent_linear_space = np.linspace(-extent, extent,
                                           self.wavefront.number_of_pixels)
         x_map, y_map = np.meshgrid(extent_linear_space, extent_linear_space)
@@ -66,7 +66,7 @@ class Pinhole(OpticalElement):
         if not (self.wavefront == wavefront):
             raise Exception('Pinhole must be applied to the same wavefront that was used to initialize it')
         else:
-            if not wavefront.is_pupil_plane:
+            if not wavefront.is_in_pupil_plane:
                 wavefront.complex_amplitude *= self.aperture_function
             else:
                 raise Exception('Pinholes can only be applied to wavefronts in the focal plane')
