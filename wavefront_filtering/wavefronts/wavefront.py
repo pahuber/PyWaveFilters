@@ -15,6 +15,8 @@ class BaseWavefront:
         '''
         Constructor for base wavefront object.
         '''
+        self.wavelength = 0 * u.meter
+        self.beam_diameter = 0 * u.meter
         self.complex_amplitude = None
         self.is_in_pupil_plane = None
         self.extent_pupil_plane_meters = None
@@ -23,8 +25,6 @@ class BaseWavefront:
         self.number_of_pixels = 1
         self.has_fiber_been_applied = None
         self._length_per_pixel = 300e-6 * u.meter
-        self.beam_diameter = 1 * u.meter  # TODO: implement correctly
-        self.wavelength = 1 * u.meter  # TODO: implement correctly
 
     def __add__(self, other_wavefront):
         '''
@@ -35,7 +35,13 @@ class BaseWavefront:
                 Returns:
                         Combined wavefront object
         '''
-        if self.is_in_pupil_plane == other_wavefront.is_in_pupil_plane:
+        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
+            raise Exception('Wavefronts must both be in pupil or in focal plane')
+        elif self.beam_diameter != other_wavefront.beam_diameter:
+            raise Exception('Wavefronts must have same beam diameter')
+        elif self.wavelength != other_wavefront.wavelength:
+            raise Exception('Wavefronts must have same wavelengths')
+        else:
             return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude,
                                      self.is_in_pupil_plane,
                                      self.extent_pupil_plane_meters,
@@ -43,8 +49,6 @@ class BaseWavefront:
                                      self.extent_focal_plane_meters,
                                      self.number_of_pixels,
                                      self.has_fiber_been_applied)
-        else:
-            raise ValueError('Wavefronts must both be in pupil or in focal plane')
 
     def apply(self, optical_element: OpticalElement):
         '''
@@ -226,6 +230,8 @@ class CombinedWavefront(BaseWavefront):
     '''
 
     def __init__(self,
+                 wavelength: float,
+                 beam_diameter: float,
                  complex_amplitude: np.ndarray,
                  is_in_pupil_plane: bool,
                  extent_pupil_plane_meters: float,
@@ -237,6 +243,8 @@ class CombinedWavefront(BaseWavefront):
         Constructor for combined wavefront object.
 
                 Parameters:
+                        wavelength: Wavelength of each of the wavefronts
+                        beam_diameter: Beam diameter of each of the wavefronts
                         complex_amplitude: Complex amplitude of the combined wavefront
                         is_in_pupil_plane: Boolean specifying whether we are in the spatial domain or not
                         extent_pupil_plane_meters: Full array width in pupil plane in meters
