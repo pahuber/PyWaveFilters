@@ -50,7 +50,7 @@ class Pinhole(OpticalElement):
                 Returns:
                         Array containing circular aperture.
         '''
-        extent = self.wavefront.array_width_focal_plane_dimensionless / 2
+        extent = self.wavefront.extent_focal_plane_dimensionless / 2
         extent_linear_space = np.linspace(-extent, extent,
                                           self.wavefront.number_of_pixels)
         x_map, y_map = np.meshgrid(extent_linear_space, extent_linear_space)

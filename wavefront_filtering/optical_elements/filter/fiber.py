@@ -70,10 +70,10 @@ class Fiber(OpticalElement):
         '''
         if not (type(value) == astropy.units.quantity.Quantity and value.unit == u.meter):
             raise ValueError(f'Units of core radius must be specified in meters.')
-        if self.wavefront.array_width_focal_plane_dimensionless * self.lens.focal_length / 2 < value:
+        if self.wavefront.extent_focal_plane_dimensionless * self.lens.focal_length / 2 < value:
             raise ValueError(
                 f'core diameter {2 * value} must be smaller than the wavefront array width in meters '
-                f'{self.wavefront.array_width_focal_plane_dimensionless * self.lens.focal_length}')
+                f'{self.wavefront.extent_focal_plane_dimensionless * self.lens.focal_length}')
         self._core_radius = value
 
     def get_v_number(self) -> float:
@@ -101,8 +101,8 @@ class Fiber(OpticalElement):
                                         (np.sqrt(self.v_number).value, np.sqrt(self.v_number).value),
                                         self.v_number.value)
 
-        extent = self.wavefront.array_width_focal_plane_dimensionless * self.lens.focal_length / \
-                 self.wavefront.aperture_diameter * self.wavefront.wavelength / 2
+        extent = self.wavefront.extent_focal_plane_dimensionless * self.lens.focal_length / \
+                 self.wavefront.beam_diameter * self.wavefront.wavelength / 2
         extent_linear_space = np.linspace(-extent, extent, self.wavefront.number_of_pixels)
         X, Y = np.meshgrid(extent_linear_space, extent_linear_space)
 

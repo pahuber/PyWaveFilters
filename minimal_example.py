@@ -10,13 +10,13 @@ from wavefront_filtering.wavefronts.wavefront import Wavefront
 wavelength = 1e-5 * u.meter
 initial_intensity = 10 * u.watt ** 0.5 / u.meter
 zernike_modes = [(5, 0 * wavelength / 5)]
-aperture_diameter = 0.003 * u.meter
+beam_diameter = 0.003 * u.meter
 number_of_pixels = 100
 
 wavefront = Wavefront(wavelength,
                       initial_intensity,
                       zernike_modes,
-                      aperture_diameter,
+                      beam_diameter,
                       number_of_pixels)
 
 # Define optical elements
@@ -35,7 +35,7 @@ fiber = Fiber(wavelength,
               lens)
 
 # Plot fiber mode
-e = wavefront.array_width_focal_plane_dimensionless * focal_length.value / aperture_diameter * wavelength / 2
+e = wavefront.extent_focal_plane_dimensionless * focal_length.value / beam_diameter * wavelength / 2
 plt.imshow(abs(fiber.fundamental_fiber_mode) ** 2, extent=[-e, e, -e, e])
 plt.colorbar()
 plt.show()
@@ -43,7 +43,7 @@ plt.show()
 # Apply optical elements
 wavefront.apply(lens)
 
-e = wavefront.array_width_focal_plane_length.value / 2
+e = wavefront.extent_focal_plane_meters.value / 2
 plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
 plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
 plt.colorbar()

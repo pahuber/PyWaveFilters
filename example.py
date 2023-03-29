@@ -9,17 +9,17 @@ from wavefront_filtering.wavefronts.wavefront import Wavefront
 wavelength = 1e-5 * u.meter
 initial_intensity = 1 * u.watt ** 0.5 / u.meter
 zernike_modes = [(5, 0 * wavelength / 10)]
-aperture_diameter = 0.003 * u.meter
+beam_diameter = 0.003 * u.meter
 number_of_pixels = 1000
 
 wavefront = Wavefront(wavelength,
                       initial_intensity,
                       zernike_modes,
-                      aperture_diameter,
+                      beam_diameter,
                       number_of_pixels)
 
 # Plot complex amplitude of wavefront in aperture plane
-extent_pupil = wavefront.array_width_pupil_plane.value / 2
+extent_pupil = wavefront.extent_pupil_plane_meters.value / 2
 plt.imshow(abs((wavefront.complex_amplitude.value) ** 2),
            extent=[-extent_pupil, extent_pupil, -extent_pupil, extent_pupil])
 plt.xlabel('$x$ (m)')
@@ -39,7 +39,7 @@ lens = Lens(0.001 * u.meter)
 wavefront.apply(lens)
 
 # Plot wavefront in focal plane
-extent_focal = wavefront.array_width_focal_plane_length.value / 2
+extent_focal = wavefront.extent_focal_plane_meters.value / 2
 plt.imshow(abs((wavefront.complex_amplitude.value) ** 2),
            extent=[-extent_focal, extent_focal, -extent_focal, extent_focal])
 plt.title('Wavefront in Focal Plane')
