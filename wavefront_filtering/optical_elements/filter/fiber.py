@@ -116,7 +116,9 @@ class Fiber(OpticalElement):
                 fundamental_fiber_mode[x][y] = get_mode_function(radii[x][y], angles[x][y], u_variable, w_variable,
                                                                  self.core_radius)
 
-        return fundamental_fiber_mode
+        normalization_constant = 1 / np.sqrt(np.sum(abs(self.fundamental_fiber_mode) ** 2))
+
+        return normalization_constant * fundamental_fiber_mode
 
     def get_coupling_efficiency(self) -> float:
         '''
@@ -154,6 +156,7 @@ class Fiber(OpticalElement):
             if not wavefront.is_pupil_plane:
                 self.coupling_efficiency = self.get_coupling_efficiency()
                 wavefront.complex_amplitude = self.fundamental_fiber_mode * self.coupling_efficiency
+                # TODO: check correct output of complex amplitude
                 wavefront.has_fiber_been_applied = True
             else:
                 raise Exception('Fibers can only be applied to wavefronts in the focal plane')
