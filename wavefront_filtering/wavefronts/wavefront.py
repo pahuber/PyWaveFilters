@@ -16,7 +16,7 @@ class BaseWavefront:
         Constructor for base wavefront object.
         '''
         self.complex_amplitude = None
-        self.is_pupil_plane = None
+        self.is_in_pupil_plane = None
         self.extent_pupil_plane_meters = None
         self.extent_focal_plane_dimensionless = None
         self.extent_focal_plane_meters = None  # Is reset to None after leaving the focal plane
@@ -35,9 +35,9 @@ class BaseWavefront:
                 Returns:
                         Combined wavefront object
         '''
-        if self.is_pupil_plane == other_wavefront.is_pupil_plane:
+        if self.is_in_pupil_plane == other_wavefront.is_in_pupil_plane:
             return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude,
-                                     self.is_pupil_plane,
+                                     self.is_in_pupil_plane,
                                      self.extent_pupil_plane_meters,
                                      self.extent_focal_plane_dimensionless,
                                      self.extent_focal_plane_meters,
@@ -86,7 +86,7 @@ class Wavefront(BaseWavefront):
         self.aperture_function = self.get_aperture_function()
         self.initial_wavefront_error = self.get_wavefront_error()
         self.complex_amplitude = self.get_initial_complex_amplitude()
-        self.is_pupil_plane = True
+        self.is_in_pupil_plane = True
 
     @property
     def wavelength(self) -> float:
@@ -227,7 +227,7 @@ class CombinedWavefront(BaseWavefront):
 
     def __init__(self,
                  complex_amplitude: np.ndarray,
-                 is_pupil_plane: bool,
+                 is_in_pupil_plane: bool,
                  extent_pupil_plane_meters: float,
                  extent_focal_plane_dimensionless: float,
                  extent_focal_plane_meters: float,
@@ -238,7 +238,7 @@ class CombinedWavefront(BaseWavefront):
 
                 Parameters:
                         complex_amplitude: Complex amplitude of the combined wavefront
-                        is_pupil_plane: Boolean specifying whether we are in the spatial domain or not
+                        is_in_pupil_plane: Boolean specifying whether we are in the spatial domain or not
                         extent_pupil_plane_meters: Full array width in pupil plane in meters
                         extent_focal_plane_dimensionless: Full array width in focal plane dimensionless
                         extent_focal_plane_meters: Full array width in focal plane in meters
@@ -246,7 +246,7 @@ class CombinedWavefront(BaseWavefront):
                         is_fiber_applied: Boolean specifying whether a fiber has been applied
         '''
         self.complex_amplitude = complex_amplitude
-        self.is_pupil_plane = is_pupil_plane
+        self.is_in_pupil_plane = is_in_pupil_plane
         self.extent_pupil_plane_meters = extent_pupil_plane_meters
         self.extent_focal_plane_dimensionless = extent_focal_plane_dimensionless
         self.extent_focal_plane_meters = extent_focal_plane_meters

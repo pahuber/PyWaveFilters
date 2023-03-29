@@ -153,7 +153,7 @@ class Fiber(OpticalElement):
         if not (self.wavefront == wavefront):
             raise Exception('Fiber must be applied to the same wavefront that was used to initialize it')
         else:
-            if not wavefront.is_pupil_plane:
+            if not wavefront.is_in_pupil_plane:
                 self.coupling_efficiency = self.get_coupling_efficiency()
                 wavefront.complex_amplitude = self.fundamental_fiber_mode * self.coupling_efficiency
                 # TODO: check correct output of complex amplitude

@@ -48,10 +48,10 @@ class Lens(OpticalElement):
                 Parameters:
                         wavefront: Base wavefront object
         '''
-        if wavefront.is_pupil_plane:
+        if wavefront.is_in_pupil_plane:
             wavefront.complex_amplitude = fftshift(wavefront.complex_amplitude)  # TODO: double check this shift
             wavefront.complex_amplitude = fftshift(fft2(wavefront.complex_amplitude))
-            wavefront.is_pupil_plane = False
+            wavefront.is_in_pupil_plane = False
             wavefront.extent_focal_plane_meters = wavefront.extent_focal_plane_dimensionless / \
                                                   wavefront.beam_diameter * self.focal_length * \
                                                   wavefront.wavelength
@@ -63,5 +63,5 @@ class Lens(OpticalElement):
             else:
                 wavefront.complex_amplitude = ifft2(wavefront.complex_amplitude)
 
-            wavefront.is_pupil_plane = True
+            wavefront.is_in_pupil_plane = True
             wavefront.extent_focal_plane_meters = None
