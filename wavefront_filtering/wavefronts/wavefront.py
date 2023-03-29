@@ -20,7 +20,11 @@ class BaseWavefront:
         self.array_width_pupil_plane = None
         self.array_width_focal_plane_dimensionless = None
         self.array_width_focal_plane_length = None  # Is reset to None after leaving the focal plane
+        self.number_of_pixels = 1
+        self.has_fiber_been_applied = None
         self._length_per_pixel = 300e-6 * u.meter
+        self.aperture_diameter = 1 * u.meter  # TODO: implement correctly
+        self.wavelength = 1 * u.meter  # TODO: implement correctly
 
     def __add__(self, other_wavefront):
         '''
@@ -36,9 +40,11 @@ class BaseWavefront:
                                      self.is_pupil_plane,
                                      self.array_width_pupil_plane,
                                      self.array_width_focal_plane_dimensionless,
-                                     self.array_width_focal_plane_length)
+                                     self.array_width_focal_plane_length,
+                                     self.number_of_pixels,
+                                     self.has_fiber_been_applied)
         else:
-            raise ValueError('Wavefronts must both be in spatial or in frequency domain')
+            raise ValueError('Wavefronts must both be in pupil or in focal plane')
 
     def apply(self, optical_element: OpticalElement):
         '''
@@ -73,7 +79,7 @@ class Wavefront(BaseWavefront):
         self.initial_amplitude = initial_amplitude
         self.zernike_modes = zernike_modes
         self.aperture_diameter = aperture_diameter
-        self.array_dimension = number_of_pixels
+        self.number_of_pixels = number_of_pixels
 
         self.array_width_pupil_plane = number_of_pixels * self._length_per_pixel
         self.array_width_focal_plane_dimensionless = aperture_diameter / self._length_per_pixel
@@ -140,23 +146,23 @@ class Wavefront(BaseWavefront):
         self._aperture_diameter = value
 
     @property
-    def array_dimension(self) -> int:
+    def number_of_pixels(self) -> int:
         '''
-        Return the array dimension.
+        Return the number of pixels.
 
                 Returns:
-                        Integer corresponding to the array dimension
+                        Integer corresponding to the number of pixels
         '''
-        return self._array_dimension
+        return self._number_of_pixels
 
-    @array_dimension.setter
-    def array_dimension(self, value):
+    @number_of_pixels.setter
+    def number_of_pixels(self, value):
         '''
-        Setter method for the array dimension.
+        Setter method for the number of pixels.
         '''
         if not (type(value) == int and value > 0):
-            raise ValueError(f'Array dimension must be a positive integer.')
-        self._array_dimension = value
+            raise ValueError(f'Number of pixels must be a positive integer.')
+        self._number_of_pixels = value
 
     @property
     def intensity(self) -> np.ndarray:
@@ -175,8 +181,8 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing circular aperture.
         '''
-        extent = self.array_dimension / 2 * self._length_per_pixel
-        extent_linear_space = np.linspace(-extent, extent, self.array_dimension)
+        extent = self.number_of_pixels / 2 * self._length_per_pixel
+        extent_linear_space = np.linspace(-extent, extent, self.number_of_pixels)
         self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         self._aperture_radius = self.aperture_diameter / 2
 
@@ -224,7 +230,9 @@ class CombinedWavefront(BaseWavefront):
                  is_pupil_plane: bool,
                  array_width_pupil_plane: float,
                  array_width_focal_plane_dimensionless: float,
-                 array_width_focal_plane_length: float):
+                 array_width_focal_plane_length: float,
+                 number_of_pixels: int,
+                 is_fiber_applied: bool):
         '''
         Constructor for combined wavefront object.
 
@@ -233,10 +241,14 @@ class CombinedWavefront(BaseWavefront):
                         is_pupil_plane: Boolean specifying whether we are in the spatial domain or not
                         array_width_pupil_plane: Array width in pupil plane
                         array_width_focal_plane_dimensionless: Array width in focal plane dimensionless
-                        array_width_focal_plane_length: Array width in focal plane in units of lenth
+                        array_width_focal_plane_length: Array width in focal plane in units of length
+                        number_of_pixels: Number of pixels in array
+                        is_fiber_applied: Boolean specifying whether a fiber has been applied
         '''
         self.complex_amplitude = complex_amplitude
         self.is_pupil_plane = is_pupil_plane
         self.array_width_pupil_plane = array_width_pupil_plane
         self.array_width_focal_plane_dimensionless = array_width_focal_plane_dimensionless
         self.array_width_focal_plane_length = array_width_focal_plane_length
+        self.number_of_pixels = number_of_pixels
+        self.is_fiber_applied = is_fiber_applied

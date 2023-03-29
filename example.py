@@ -35,11 +35,11 @@ plt.colorbar()
 plt.show()
 
 # Apply lens to transform to focal plane
-lens = Lens(100)
+lens = Lens(0.001 * u.meter)
 wavefront.apply(lens)
 
 # Plot wavefront in focal plane
-extent_focal = wavefront.array_width_focal_plane / 2
+extent_focal = wavefront.array_width_focal_plane_length.value / 2
 plt.imshow(abs((wavefront.complex_amplitude.value) ** 2),
            extent=[-extent_focal, extent_focal, -extent_focal, extent_focal])
 plt.title('Wavefront in Focal Plane')

@@ -21,7 +21,7 @@ class Pinhole(OpticalElement):
         '''
         self.aperture_radius = aperture_radius
         self.wavefront = wavefront
-        description = f'Pinhole with aperture diameter {self.aperture_radius}.'
+        self.description = f'Pinhole with aperture diameter {self.aperture_radius}.'
         self.aperture_function = self.get_aperture_function()
 
     @property
@@ -52,7 +52,7 @@ class Pinhole(OpticalElement):
         '''
         extent = self.wavefront.array_width_focal_plane_dimensionless / 2
         extent_linear_space = np.linspace(-extent, extent,
-                                          self.wavefront.array_dimension)
+                                          self.wavefront.number_of_pixels)
         x_map, y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         return x_map ** 2 + y_map ** 2 < self.aperture_radius ** 2
 
@@ -69,4 +69,4 @@ class Pinhole(OpticalElement):
             if not wavefront.is_pupil_plane:
                 wavefront.complex_amplitude *= self.aperture_function
             else:
-                raise Exception('Pinholes can only be applied to wavefronts in the frequency domain')
+                raise Exception('Pinholes can only be applied to wavefronts in the focal plane')
