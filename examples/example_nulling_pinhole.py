@@ -7,20 +7,17 @@ from wavefront_filtering.wavefronts.wavefront import Wavefront
 
 # Define wavefront
 wavelength = 1e-5 * u.meter
-initial_intensity = 10 * u.watt ** 0.5 / u.meter
 zernike_modes_1 = [(5, wavelength / 1000)]
 zernike_modes_2 = [(6, wavelength / 1000)]
 beam_diameter = 0.003 * u.meter
 number_of_pixels = 100
 
 wavefront_1 = Wavefront(wavelength,
-                        initial_intensity,
                         zernike_modes_1,
                         beam_diameter,
                         number_of_pixels)
 
 wavefront_2 = Wavefront(wavelength,
-                        initial_intensity,
                         zernike_modes_2,
                         beam_diameter,
                         number_of_pixels)

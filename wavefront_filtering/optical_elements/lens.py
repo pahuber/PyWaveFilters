@@ -52,12 +52,19 @@ class Lens(OpticalElement):
         if wavefront.is_in_pupil_plane:
             wavefront.complex_amplitude = fftshift(wavefront.complex_amplitude)
             wavefront.complex_amplitude = fftshift(fft2(wavefront.complex_amplitude))
+
+            # Normalize by number of pixels to make independent of amount of pixels
+            wavefront.complex_amplitude /= wavefront.number_of_pixels
+
             wavefront.is_in_pupil_plane = False
             wavefront.extent_focal_plane_meters = wavefront.get_extent_focal_plane_meters(wavefront.wavelength,
                                                                                           wavefront.beam_diameter, self)
         else:
             wavefront.complex_amplitude = fftshift(wavefront.complex_amplitude)
             wavefront.complex_amplitude = fftshift(ifft2(wavefront.complex_amplitude))
+
+            # Normalize by number of pixels to make independent of amount of pixels
+            wavefront.complex_amplitude *= wavefront.number_of_pixels
             if wavefront.has_fiber_been_applied:
                 wavefront.has_fiber_been_applied = None
 

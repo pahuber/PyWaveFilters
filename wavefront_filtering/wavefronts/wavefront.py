@@ -132,7 +132,6 @@ class Wavefront(BaseWavefront):
 
     def __init__(self,
                  wavelength: float,
-                 initial_amplitude: float,
                  zernike_modes: list,
                  beam_diameter: float,
                  number_of_pixels: int):
@@ -141,14 +140,12 @@ class Wavefront(BaseWavefront):
 
                 Parameters:
                         wavelength: Wavelength of the wavefront in meters
-                        initial_amplitude: Initial amplitude of the wavefront in sqrt(watts)/meter
                         zernike_modes: List containing the zernike mode indices and their coefficients in meters
                         beam_diameter: Beam diameter in the aperture plane in meters
                         number_of_pixels: Side length of the output array in pixels (1 pixel =^ 300 um)
         """
         BaseWavefront.__init__(self)
         self.wavelength = wavelength
-        self.initial_amplitude = initial_amplitude
         self.zernike_modes = zernike_modes
         self.beam_diameter = beam_diameter
         self.number_of_pixels = number_of_pixels
@@ -178,25 +175,6 @@ class Wavefront(BaseWavefront):
         if not (type(value) == astropy.units.quantity.Quantity and value.unit == u.meter):
             raise ValueError(f'Units of wavelength must be specified in meters.')
         self._wavelength = value
-
-    @property
-    def initial_amplitude(self) -> float:
-        """
-        Return the initial amplitude.
-
-                Returns:
-                        Float corresponding to the initial amplitude
-        """
-        return self._initial_amplitude
-
-    @initial_amplitude.setter
-    def initial_amplitude(self, value):
-        """
-        Setter method for the initial amplitude.
-        """
-        if not (type(value) == astropy.units.quantity.Quantity and value.unit ** 2 == u.watt / u.meter ** 2):
-            raise ValueError(f'Units of the initial amplitude must be specified in sqrt(watt/meter^2).')
-        self._initial_amplitude = value
 
     @property
     def beam_diameter(self) -> float:
@@ -248,7 +226,7 @@ class Wavefront(BaseWavefront):
         self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         self._aperture_radius = self.beam_diameter / 2
 
-        return self.initial_amplitude * (self._x_map ** 2 + self._y_map ** 2 < self._aperture_radius ** 2).astype(
+        return 1 * u.watt ** 0.5 / u.meter * (self._x_map ** 2 + self._y_map ** 2 < self._aperture_radius ** 2).astype(
             complex)
 
     def get_wavefront_error(self) -> np.ndarray:
@@ -279,7 +257,10 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing the complex amplitude.
         """
-        return self.aperture_function * np.exp(-2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
+        complex_amplitude = self.aperture_function * np.exp(
+            -2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
+        normalization_constant = 1 / np.sqrt(np.sum(abs(complex_amplitude) ** 2))
+        return normalization_constant * complex_amplitude
 
 
 class CombinedWavefront(BaseWavefront):
