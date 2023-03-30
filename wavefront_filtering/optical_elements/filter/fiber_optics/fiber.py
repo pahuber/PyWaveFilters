@@ -155,7 +155,7 @@ class Fiber(OpticalElement):
             if not wavefront.is_in_pupil_plane:
                 self.coupling_efficiency = self.get_coupling_efficiency()
                 wavefront.complex_amplitude = self.fundamental_fiber_mode * self.coupling_efficiency
-                # TODO: check correct output of complex amplitude
+                # TODO: check correct output of complex amplitude, also in terms of units (sensible values?)
                 wavefront.has_fiber_been_applied = True
             else:
                 raise Exception('Fibers can only be applied to wavefronts in the focal plane')

@@ -63,7 +63,7 @@ def plot_intensity_focal_plane(wavefront: BaseWavefront, title=None, dimensionle
         plt.ylabel('Height (m)')
 
     colorbar = plt.colorbar()
-    colorbar.set_label('Intensity (W/m$^2$)')
+    colorbar.set_label('Intensity (W/m$^2$)')  # TODO: check units
 
     plt.show()
 
@@ -79,7 +79,7 @@ def plot_initial_wavefront_error(wavefront: Wavefront, title=None):
     plt.imshow(wavefront.initial_wavefront_error.value)
 
     if title is None:
-        plt.title('Intensity Pupil Plane')
+        plt.title('Initial Wavefront Error')
     else:
         plt.title(title)
 
