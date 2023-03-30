@@ -64,8 +64,8 @@ class Pinhole(OpticalElement):
                 Parameters:
                         wavefront: Wavefront object
         """
-        if not (self.wavefront == wavefront):
-            raise Exception('Pinhole must be applied to the same wavefront that was used to initialize it')
+        if not (self.beam_diameter == wavefront.beam_diameter):
+            raise Exception('Wavefront must have same beam diameter as was used to initialize pinhole')
         else:
             if not wavefront.is_in_pupil_plane:
                 wavefront.complex_amplitude *= self.aperture_function
