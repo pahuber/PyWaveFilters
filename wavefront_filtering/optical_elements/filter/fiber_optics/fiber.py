@@ -5,7 +5,7 @@ import numpy as np
 from astropy import units as u
 from scipy.optimize import fsolve
 
-from wavefront_filtering.optical_elements.filter.bessel import get_system_of_equations, \
+from wavefront_filtering.optical_elements.filter.fiber_optics.bessel import get_system_of_equations, \
     get_mode_function
 from wavefront_filtering.optical_elements.lens import Lens
 from wavefront_filtering.optical_elements.optical_element import OpticalElement
