@@ -50,6 +50,18 @@ class BaseWavefront:
                                      self.number_of_pixels,
                                      self.has_fiber_been_applied)
 
+    def get_extent_focal_plane_meters(self, lens: OpticalElement) -> float:
+        '''
+        Return a value corresponding to the full extent of the array in meters.
+
+                Parameters:
+                        lens: Lens object
+
+                Returns:
+                        Value corresponding to the full extent in meters
+        '''
+        return self.extent_focal_plane_dimensionless / self.beam_diameter * lens.focal_length * self.wavelength
+
     def apply(self, optical_element: OpticalElement):
         '''
         Apply an optical element.

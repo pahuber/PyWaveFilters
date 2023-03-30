@@ -101,7 +101,7 @@ class Fiber(OpticalElement):
                                         (np.sqrt(self.v_number).value, np.sqrt(self.v_number).value),
                                         self.v_number.value)
 
-        extent = self.lens.get_extent_focal_plane_meters() / 2
+        extent = self.wavefront.get_extent_focal_plane_meters(self.lens) / 2
         extent_linear_space = np.linspace(-extent, extent, self.wavefront.number_of_pixels)
         X, Y = np.meshgrid(extent_linear_space, extent_linear_space)
 
@@ -115,7 +115,7 @@ class Fiber(OpticalElement):
                 fundamental_fiber_mode[x][y] = get_mode_function(radii[x][y], angles[x][y], u_variable, w_variable,
                                                                  self.core_radius)
 
-        normalization_constant = 1 / np.sqrt(np.sum(abs(self.fundamental_fiber_mode) ** 2))
+        normalization_constant = 1 / np.sqrt(np.sum(abs(fundamental_fiber_mode) ** 2))
 
         return normalization_constant * fundamental_fiber_mode
 
