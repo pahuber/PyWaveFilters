@@ -4,12 +4,14 @@ from matplotlib import pyplot as plt
 from wavefront_filtering.optical_elements.filter.fiber import Fiber
 from wavefront_filtering.optical_elements.filter.pinhole import Pinhole
 from wavefront_filtering.optical_elements.lens import Lens
+from wavefront_filtering.util.plot import plot_intensity_pupil_plane, plot_intensity_focal_plane, \
+    plot_initial_wavefront_error
 from wavefront_filtering.wavefronts.wavefront import Wavefront
 
 # Define wavefront
 wavelength = 1e-5 * u.meter
 initial_intensity = 10 * u.watt ** 0.5 / u.meter
-zernike_modes = [(5, 0 * wavelength / 5)]
+zernike_modes = [(5, 1 * wavelength / 5)]
 beam_diameter = 0.003 * u.meter
 number_of_pixels = 100
 
@@ -48,14 +50,19 @@ fiber = Fiber(wavelength,
 # plt.colorbar()
 # plt.show()
 
-e = 1
-plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
-plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
-plt.colorbar()
-plt.show()
+plot_initial_wavefront_error(wavefront1)
+
+plot_intensity_pupil_plane(wavefront)
+# e = 1
+# plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
+# plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
+# plt.colorbar()
+# plt.show()
 
 # Apply optical elements
 wavefront.apply(lens)
+
+plot_intensity_focal_plane(wavefront, dimensionless=True)
 
 # e = wavefront.extent_focal_plane_meters.value / 2
 plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
