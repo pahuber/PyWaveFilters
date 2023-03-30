@@ -52,6 +52,32 @@ class BaseWavefront:
                                      self.number_of_pixels,
                                      self.has_fiber_been_applied)
 
+    def __sub__(self, other_wavefront):
+        """
+        Method to subtract one base wavefront from another.
+
+                Parameters:
+                        other_wavefront: Base wavefront object to be subtracted
+                Returns:
+                        Combined, i.e. subtracted, wavefront object
+        """
+        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
+            raise Exception('Wavefronts must both be in pupil or in focal plane')
+        elif self.beam_diameter != other_wavefront.beam_diameter:
+            raise Exception('Wavefronts must have same beam diameter')
+        elif self.wavelength != other_wavefront.wavelength:
+            raise Exception('Wavefronts must have same wavelengths')
+        else:
+            return CombinedWavefront(self.wavelength,
+                                     self.beam_diameter,
+                                     self.complex_amplitude - other_wavefront.complex_amplitude,
+                                     self.is_in_pupil_plane,
+                                     self.extent_pupil_plane_meters,
+                                     self.extent_focal_plane_dimensionless,
+                                     self.extent_focal_plane_meters,
+                                     self.number_of_pixels,
+                                     self.has_fiber_been_applied)
+
     @property
     def intensity(self) -> np.ndarray:
         """
