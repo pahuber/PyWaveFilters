@@ -25,11 +25,12 @@ focal_length = 0.008 * u.meter
 lens = Lens(focal_length)
 
 fiber = Fiber(wavelength,
+              beam_diameter,
               21e-6 * u.meter,
               125e-6 * u.meter,
               1.6,
               1.59,
-              wavefront,
+              number_of_pixels,
               lens)
 
 # Apply optical elements to wavefront and plot at each stage

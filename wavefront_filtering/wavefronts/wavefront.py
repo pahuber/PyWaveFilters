@@ -11,6 +11,37 @@ class BaseWavefront:
     Base class to represent wavefronts.
     """
 
+    _length_per_pixel = 300e-6 * u.meter
+
+    @staticmethod
+    def get_extent_focal_plane_dimensionless(beam_diameter: float):
+        """
+        Return a value corresponding to the full extent of the array in wavelength over aperture diameter.
+
+                Parameters:
+                        beam_diameter: Beam diameter of the wavefront
+
+                Returns:
+                        Value corresponding to the full extent in dimensionless units
+        """
+        return beam_diameter / BaseWavefront._length_per_pixel
+
+    @staticmethod
+    def get_extent_focal_plane_meters(wavelength: float, beam_diameter: float, lens: OpticalElement) -> float:
+        """
+        Return a value corresponding to the full extent of the array in meters.
+
+                Parameters:
+                        wavelength: Wavelength of the wavefront
+                        beam_diameter: Beam diameter of the wavefront
+                        lens: Lens object
+
+                Returns:
+                        Value corresponding to the full extent in meters
+        """
+        return BaseWavefront.get_extent_focal_plane_dimensionless(
+            beam_diameter) / beam_diameter * lens.focal_length * wavelength
+
     def __init__(self):
         """
         Constructor for base wavefront object.
@@ -24,7 +55,6 @@ class BaseWavefront:
         self.extent_focal_plane_meters = None  # Is reset to None after leaving the focal plane
         self.number_of_pixels = 1
         self.has_fiber_been_applied = None
-        self._length_per_pixel = 300e-6 * u.meter
 
     def __add__(self, other_wavefront):
         """
@@ -88,18 +118,6 @@ class BaseWavefront:
         """
         return abs(self.complex_amplitude) ** 2
 
-    def get_extent_focal_plane_meters(self, lens: OpticalElement) -> float:
-        """
-        Return a value corresponding to the full extent of the array in meters.
-
-                Parameters:
-                        lens: Lens object
-
-                Returns:
-                        Value corresponding to the full extent in meters
-        """
-        return self.extent_focal_plane_dimensionless / self.beam_diameter * lens.focal_length * self.wavelength
-
     def apply(self, optical_element: OpticalElement):
         """
         Apply an optical element.
@@ -135,8 +153,8 @@ class Wavefront(BaseWavefront):
         self.beam_diameter = beam_diameter
         self.number_of_pixels = number_of_pixels
 
-        self.extent_pupil_plane_meters = number_of_pixels * self._length_per_pixel
-        self.extent_focal_plane_dimensionless = beam_diameter / self._length_per_pixel
+        self.extent_pupil_plane_meters = number_of_pixels * BaseWavefront._length_per_pixel
+        self.extent_focal_plane_dimensionless = self.get_extent_focal_plane_dimensionless(self.beam_diameter)
         self.aperture_function = self.get_aperture_function()
         self.initial_wavefront_error = self.get_wavefront_error()
         self.complex_amplitude = self.get_initial_complex_amplitude()
@@ -225,7 +243,7 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing circular aperture.
         """
-        extent = self.number_of_pixels / 2 * self._length_per_pixel
+        extent = self.extent_pupil_plane_meters / 2
         extent_linear_space = np.linspace(-extent, extent, self.number_of_pixels)
         self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         self._aperture_radius = self.beam_diameter / 2

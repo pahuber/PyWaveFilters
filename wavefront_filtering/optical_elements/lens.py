@@ -53,7 +53,8 @@ class Lens(OpticalElement):
             wavefront.complex_amplitude = fftshift(wavefront.complex_amplitude)
             wavefront.complex_amplitude = fftshift(fft2(wavefront.complex_amplitude))
             wavefront.is_in_pupil_plane = False
-            wavefront.extent_focal_plane_meters = wavefront.get_extent_focal_plane_meters(self)
+            wavefront.extent_focal_plane_meters = wavefront.get_extent_focal_plane_meters(wavefront.wavelength,
+                                                                                          wavefront.beam_diameter, self)
         else:
             wavefront.complex_amplitude = fftshift(wavefront.complex_amplitude)
             wavefront.complex_amplitude = fftshift(ifft2(wavefront.complex_amplitude))
