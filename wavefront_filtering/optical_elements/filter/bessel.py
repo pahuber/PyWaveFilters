@@ -5,13 +5,13 @@ from scipy.special import jv, kv
 
 
 def get_system_of_equations(variables: Tuple, v_number: float) -> float:
-    '''
+    """
     Used to solve the system of equations with scipy fsolve.
 
             Parameters:
                     variables: Tuple of variables
                     v_number: Float corresponding to the V-number of the fiber
-    '''
+    """
     u_variable, w_variable = variables
     bessel_order = 0
 
@@ -26,7 +26,7 @@ def get_mode_function(radius: float,
                       w_variable: float,
                       core_radius: float,
                       even=True) -> float:
-    '''
+    """
     Return the value of the mode function at a given position.
 
             Parameters:
@@ -39,7 +39,7 @@ def get_mode_function(radius: float,
 
             Returns:
                     The value of the mode function for a given position
-    '''
+    """
     bessel_order = 0
     radial_part = np.heaviside(core_radius - radius, 0) * jv(bessel_order, u_variable * radius / core_radius) / \
                   jv(bessel_order, u_variable) + np.heaviside(radius - core_radius, 0) * \

@@ -6,7 +6,7 @@ from wavefront_filtering.util import get_kronecker_delta
 
 
 def get_noll_index(index_n: int, index_m: int) -> int:
-    '''
+    """
     Return a single index j for each pair n, m of Zernike indices according to Noll's convention.
 
             Parameters:
@@ -15,7 +15,7 @@ def get_noll_index(index_n: int, index_m: int) -> int:
 
             Returns:
                     Noll index of Zernike polynomial
-    '''
+    """
     index_noll = (index_n * (index_n + 1)) / 2 + abs(index_m)
 
     if index_m > 0 and (index_n % 4 == 0 or index_n % 4 == 1):
@@ -31,7 +31,7 @@ def get_noll_index(index_n: int, index_m: int) -> int:
 
 
 def get_n_m_from_noll(zernike_mode_index: int) -> (int, int):
-    '''
+    """
     Return a tuple of indices corresponding to the usual Zernike polynomial indices n and m.
 
             Parameters:
@@ -39,7 +39,7 @@ def get_n_m_from_noll(zernike_mode_index: int) -> (int, int):
 
             Returns:
                     Noll index of Zernike polynomial
-    '''
+    """
     nmax = int(zernike_mode_index / 2)
     nmin = 0
     mmin = -nmax
@@ -56,7 +56,7 @@ def get_radial_zernike_polynomial(index_n: int,
                                   index_m: int,
                                   radial_map,
                                   maximum_radius) -> float:
-    '''
+    """
     Return the radial part of the Zernike polynomial.
 
             Parameters:
@@ -67,7 +67,7 @@ def get_radial_zernike_polynomial(index_n: int,
 
             Returns:
                     Float corresponding to radial part of Zernike polynomial
-    '''
+    """
     index_m = abs(index_m)
 
     if (index_n - index_m) % 2 == 0:
@@ -89,7 +89,7 @@ def get_zernike_polynomial(zernike_mode_index: int,
                            radial_map: np.ndarray,
                            angular_map: np.ndarray,
                            maximum_radius: float) -> float:
-    '''
+    """
     Return a Zernike polynomial.
 
             Parameters:
@@ -100,7 +100,7 @@ def get_zernike_polynomial(zernike_mode_index: int,
 
             Returns:
                     A Zernike polynomial
-    '''
+    """
     index_n, index_m = get_n_m_from_noll(zernike_mode_index)
 
     sign = np.sign(index_m)
