@@ -35,22 +35,113 @@ fiber = Fiber(wavelength,
               lens)
 
 # Plot fiber mode
-e = wavefront.extent_focal_plane_dimensionless * focal_length.value / beam_diameter * wavelength / 2
-plt.imshow(abs(fiber.fundamental_fiber_mode) ** 2, extent=[-e, e, -e, e])
+# e = wavefront.extent_focal_plane_dimensionless * focal_length.value / beam_diameter * wavelength / 2
+# plt.imshow(abs(fiber.fundamental_fiber_mode) ** 2, extent=[-e, e, -e, e])
+# plt.colorbar()
+# plt.show()
+
+e = 1
+plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
+plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
 plt.colorbar()
 plt.show()
 
 # Apply optical elements
 wavefront.apply(lens)
 
-e = wavefront.extent_focal_plane_meters.value / 2
+# e = wavefront.extent_focal_plane_meters.value / 2
 plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
 plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
 plt.colorbar()
+plt.title("after 1 lens")
 plt.show()
 
-wavefront.apply(pinhole)
+# wavefront.apply(pinhole)
+
+
+wavefront.apply(lens)
+
+# e = wavefront.extent_focal_plane_meters.value / 2
+plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
+plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
+plt.colorbar()
+plt.title("after 2 lens")
+plt.show()
+
+wavefront.apply(lens)
 
 wavefront.apply(fiber)
+# e = wavefront.extent_focal_plane_meters.value / 2
+plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
+plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
+plt.colorbar()
+plt.title("after 3 lens")
+plt.show()
 
-print(fiber.coupling_efficiency)
+wavefront.apply(lens)
+
+# e = wavefront.extent_focal_plane_meters.value / 2
+plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
+plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
+plt.colorbar()
+plt.title("after 4 lens")
+plt.show()
+
+wavefront.apply(lens)
+
+# e = wavefront.extent_focal_plane_meters.value / 2
+plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
+plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
+plt.colorbar()
+plt.title("after 5 lens")
+plt.show()
+
+# print(fiber.coupling_efficiency)
+
+#
+# e = 1
+# plt.plot(np.angle(wavefront.complex_amplitude[number_of_pixels // 2]))
+# plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
+# # plt.colorbar()
+# plt.show()
+#
+# # Apply optical elements
+# wavefront.apply(lens)
+#
+# # e = wavefront.extent_focal_plane_meters.value / 2
+# plt.plot(np.angle(wavefront.complex_amplitude[number_of_pixels // 2]))
+# plt.title("after 1 lens")
+# plt.show()
+#
+# # wavefront.apply(fiber)
+# # wavefront.apply(pinhole)
+#
+# # wavefront.apply(fiber)
+#
+# wavefront.apply(lens)
+#
+# # e = wavefront.extent_focal_plane_meters.value / 2
+# plt.plot(np.angle(wavefront.complex_amplitude[number_of_pixels // 2]))
+# plt.title("after 2 lens")
+# plt.show()
+#
+# wavefront.apply(lens)
+#
+# # e = wavefront.extent_focal_plane_meters.value / 2
+# plt.plot(np.angle(wavefront.complex_amplitude[number_of_pixels // 2]))
+# plt.title("after 3 lens")
+# plt.show()
+#
+# wavefront.apply(lens)
+#
+# # e = wavefront.extent_focal_plane_meters.value / 2
+# plt.plot(np.angle(wavefront.complex_amplitude[number_of_pixels // 2]))
+# plt.title("after 4 lens")
+# plt.show()
+#
+# wavefront.apply(lens)
+#
+# # e = wavefront.extent_focal_plane_meters.value / 2
+# plt.plot(np.angle(wavefront.complex_amplitude[number_of_pixels // 2]))
+# plt.title("after 5 lens")
+# plt.show()
