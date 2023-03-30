@@ -13,9 +13,9 @@ from wavefront_filtering.wavefronts.wavefront import BaseWavefront
 
 
 class Fiber(OpticalElement):
-    '''
+    """
     Class representing an optical fiber, which can be used to filter a wavefront in the focal plane.
-    '''
+    """
 
     def __init__(self,
                  intended_wavelength: float,
@@ -25,7 +25,7 @@ class Fiber(OpticalElement):
                  cladding_refractive_index: float,
                  wavefront: BaseWavefront,
                  lens: Lens):
-        '''
+        """
         Constructor for fiber object.
 
                 Parameters:
@@ -37,7 +37,7 @@ class Fiber(OpticalElement):
                         wavefront: Base wavefront object
                         lens: Lens used for coupling
 
-        '''
+        """
         self.wavefront = wavefront
         self.lens = lens
         self.intended_wavelength = intended_wavelength
@@ -55,19 +55,19 @@ class Fiber(OpticalElement):
 
     @property
     def core_radius(self) -> float:
-        '''
+        """
         Return the core radius.
 
                 Returns:
                         Float corresponding to core radius
-        '''
+        """
         return self._core_radius
 
     @core_radius.setter
     def core_radius(self, value):
-        '''
+        """
         Setter method for the core radius.
-        '''
+        """
         if not (type(value) == astropy.units.quantity.Quantity and value.unit == u.meter):
             raise ValueError(f'Units of core radius must be specified in meters.')
         if self.wavefront.extent_focal_plane_dimensionless * self.lens.focal_length / 2 < value:
@@ -77,12 +77,12 @@ class Fiber(OpticalElement):
         self._core_radius = value
 
     def get_v_number(self) -> float:
-        '''
+        """
         Return the V-number of a fiber with the given properties.
 
                 Returns:
                         V-number of the fiber
-        '''
+        """
         v_number = 2 * np.pi / self.intended_wavelength * self.core_radius * \
                    np.sqrt(self.core_refractive_index ** 2 - self.cladding_refractive_index ** 2)
         if v_number.value >= 2.405:
@@ -91,12 +91,12 @@ class Fiber(OpticalElement):
             return v_number
 
     def get_fundamental_fiber_mode(self) -> np.ndarray:
-        '''
+        """
         Return an array representing the cross-section of the fundamental fiber mode.
 
                 Returns:
                         Array representing the fundamental fiber mode
-        '''
+        """
         u_variable, w_variable = fsolve(get_system_of_equations,
                                         (np.sqrt(self.v_number).value, np.sqrt(self.v_number).value),
                                         self.v_number.value)
@@ -120,12 +120,12 @@ class Fiber(OpticalElement):
         return normalization_constant * fundamental_fiber_mode
 
     def get_coupling_efficiency(self) -> float:
-        '''
+        """
         Return the coupling efficiency of the input field into the fiber.
 
                 Returns:
                         A float corresponding to the coupling efficiency
-        '''
+        """
 
         coupling_efficiency = abs(
             np.sum(self.fundamental_fiber_mode.conjugate() * self.wavefront.complex_amplitude)) ** 2 / (
@@ -142,12 +142,12 @@ class Fiber(OpticalElement):
         return coupling_efficiency
 
     def apply(self, wavefront: BaseWavefront):
-        '''
+        """
         Implementation of the apply method of the parent class. Used to apply the optical element to the wavefront.
 
                 Parameters:
                         wavefront: Base wavefront object
-        '''
+        """
 
         if not (self.wavefront == wavefront):
             raise Exception('Fiber must be applied to the same wavefront that was used to initialize it')
