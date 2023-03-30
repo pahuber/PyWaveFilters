@@ -10,13 +10,21 @@ wavelength = 1e-5 * u.meter
 initial_intensity = 1 * u.watt ** 0.5 / u.meter
 zernike_modes = [(5, 0 * wavelength / 10)]
 beam_diameter = 0.003 * u.meter
-number_of_pixels = 1000
+number_of_pixels = 100
 
-wavefront = Wavefront(wavelength,
-                      initial_intensity,
-                      zernike_modes,
-                      beam_diameter,
-                      number_of_pixels)
+wavefront1 = Wavefront(wavelength,
+                       initial_intensity,
+                       zernike_modes,
+                       beam_diameter,
+                       number_of_pixels)
+
+wavefront2 = Wavefront(wavelength,
+                       initial_intensity,
+                       zernike_modes,
+                       beam_diameter,
+                       number_of_pixels)
+
+wavefront = wavefront1 + wavefront2
 
 # Plot complex amplitude of wavefront in aperture plane
 extent_pupil = wavefront.extent_pupil_plane_meters.value / 2
@@ -29,10 +37,10 @@ plt.colorbar()
 plt.show()
 
 # Plot wavefront error phase map
-plt.imshow(abs(wavefront.initial_wavefront_error.value) ** 2)
-plt.title('Wavefront Phase Map')
-plt.colorbar()
-plt.show()
+# plt.imshow(abs(wavefront.initial_wavefront_error.value) ** 2)
+# plt.title('Wavefront Phase Map')
+# plt.colorbar()
+# plt.show()
 
 # Apply lens to transform to focal plane
 lens = Lens(0.001 * u.meter)
@@ -49,7 +57,7 @@ plt.colorbar()
 plt.show()
 
 # Apply pinhole filter
-pinhole = Pinhole(0.03 / u.meter, wavefront)
+pinhole = Pinhole(1.22, wavefront)
 wavefront.apply(pinhole)
 
 # Plot filtered wavefront in focal plane
@@ -62,8 +70,8 @@ plt.colorbar()
 plt.show()
 
 # Apply lens to transform to output plane
-lens2 = Lens(100)
-wavefront.apply(lens2)
+# lens2 = Lens(100)
+wavefront.apply(lens)
 
 # Plot wavefront in output plane
 plt.imshow(abs((wavefront.complex_amplitude.value) ** 2),
