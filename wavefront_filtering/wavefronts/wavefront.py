@@ -42,13 +42,51 @@ class BaseWavefront:
         elif self.wavelength != other_wavefront.wavelength:
             raise Exception('Wavefronts must have same wavelengths')
         else:
-            return CombinedWavefront(self.complex_amplitude + other_wavefront.complex_amplitude,
+            return CombinedWavefront(self.wavelength,
+                                     self.beam_diameter,
+                                     self.complex_amplitude + other_wavefront.complex_amplitude,
                                      self.is_in_pupil_plane,
                                      self.extent_pupil_plane_meters,
                                      self.extent_focal_plane_dimensionless,
                                      self.extent_focal_plane_meters,
                                      self.number_of_pixels,
                                      self.has_fiber_been_applied)
+
+    def __sub__(self, other_wavefront):
+        """
+        Method to subtract one base wavefront from another.
+
+                Parameters:
+                        other_wavefront: Base wavefront object to be subtracted
+                Returns:
+                        Combined, i.e. subtracted, wavefront object
+        """
+        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
+            raise Exception('Wavefronts must both be in pupil or in focal plane')
+        elif self.beam_diameter != other_wavefront.beam_diameter:
+            raise Exception('Wavefronts must have same beam diameter')
+        elif self.wavelength != other_wavefront.wavelength:
+            raise Exception('Wavefronts must have same wavelengths')
+        else:
+            return CombinedWavefront(self.wavelength,
+                                     self.beam_diameter,
+                                     self.complex_amplitude - other_wavefront.complex_amplitude,
+                                     self.is_in_pupil_plane,
+                                     self.extent_pupil_plane_meters,
+                                     self.extent_focal_plane_dimensionless,
+                                     self.extent_focal_plane_meters,
+                                     self.number_of_pixels,
+                                     self.has_fiber_been_applied)
+
+    @property
+    def intensity(self) -> np.ndarray:
+        """
+        Return the intensity as a function of the complex amplitude.
+
+                Returns:
+                        Array containing intensity
+        """
+        return abs(self.complex_amplitude) ** 2
 
     def get_extent_focal_plane_meters(self, lens: OpticalElement) -> float:
         """
@@ -180,16 +218,6 @@ class Wavefront(BaseWavefront):
             raise ValueError(f'Number of pixels must be a positive integer.')
         self._number_of_pixels = value
 
-    @property
-    def intensity(self) -> np.ndarray:
-        """
-        Return the intensity as a function of the complex amplitude.
-
-                Returns:
-                        Array containing intensity
-        """
-        return abs(self.complex_amplitude) ** 2
-
     def get_aperture_function(self) -> np.ndarray:
         """
         Return an array containing a circular aperture.
@@ -250,7 +278,7 @@ class CombinedWavefront(BaseWavefront):
                  extent_focal_plane_dimensionless: float,
                  extent_focal_plane_meters: float,
                  number_of_pixels: int,
-                 is_fiber_applied: bool):
+                 has_fiber_been_applied: bool):
         """
         Constructor for combined wavefront object.
 
@@ -263,12 +291,14 @@ class CombinedWavefront(BaseWavefront):
                         extent_focal_plane_dimensionless: Full array width in focal plane dimensionless
                         extent_focal_plane_meters: Full array width in focal plane in meters
                         number_of_pixels: Number of pixels in array
-                        is_fiber_applied: Boolean specifying whether a fiber has been applied
+                        has_fiber_been_applied: Boolean specifying whether a fiber has been applied
         """
+        self.wavelength = wavelength
+        self.beam_diameter = beam_diameter
         self.complex_amplitude = complex_amplitude
         self.is_in_pupil_plane = is_in_pupil_plane
         self.extent_pupil_plane_meters = extent_pupil_plane_meters
         self.extent_focal_plane_dimensionless = extent_focal_plane_dimensionless
         self.extent_focal_plane_meters = extent_focal_plane_meters
         self.number_of_pixels = number_of_pixels
-        self.is_fiber_applied = is_fiber_applied
+        self.has_fiber_been_applied = has_fiber_been_applied

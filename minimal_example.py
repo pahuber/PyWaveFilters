@@ -13,11 +13,19 @@ zernike_modes = [(5, 0 * wavelength / 5)]
 beam_diameter = 0.003 * u.meter
 number_of_pixels = 100
 
-wavefront = Wavefront(wavelength,
-                      initial_intensity,
-                      zernike_modes,
-                      beam_diameter,
-                      number_of_pixels)
+wavefront1 = Wavefront(wavelength,
+                       initial_intensity,
+                       zernike_modes,
+                       beam_diameter,
+                       number_of_pixels)
+
+wavefront2 = Wavefront(wavelength,
+                       initial_intensity,
+                       zernike_modes,
+                       beam_diameter,
+                       number_of_pixels)
+
+wavefront = wavefront1 + wavefront2
 
 # Define optical elements
 focal_length = 0.008 * u.meter
@@ -70,7 +78,7 @@ plt.show()
 
 wavefront.apply(lens)
 
-wavefront.apply(fiber)
+# wavefront.apply(fiber)
 # e = wavefront.extent_focal_plane_meters.value / 2
 plt.imshow(wavefront.intensity.value, extent=[-e, e, -e, e])
 plt.xticks([-2e-5, -1e-5, 0, 3.25e-5, 9.76e-5])
