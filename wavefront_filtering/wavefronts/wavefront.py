@@ -154,7 +154,7 @@ class Wavefront(BaseWavefront):
         self.number_of_pixels = number_of_pixels
 
         self.extent_pupil_plane_meters = number_of_pixels * BaseWavefront._length_per_pixel
-        self.extent_focal_plane_dimensionless = self.get_extent_focal_plane_dimensionsless(self.beam_diameter)
+        self.extent_focal_plane_dimensionless = self.get_extent_focal_plane_dimensionless(self.beam_diameter)
         self.aperture_function = self.get_aperture_function()
         self.initial_wavefront_error = self.get_wavefront_error()
         self.complex_amplitude = self.get_initial_complex_amplitude()

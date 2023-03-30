@@ -40,6 +40,7 @@ class Fiber(OpticalElement):
                         lens: Lens used for coupling
 
         """
+        self.lens = lens
         self.intended_wavelength = intended_wavelength
         self.beam_diameter = beam_diameter
         self.core_radius = core_radius
@@ -47,7 +48,6 @@ class Fiber(OpticalElement):
         self.core_refractive_index = core_refractive_index
         self.cladding_refractive_index = cladding_refractive_index
         self.number_of_pixels = number_of_pixels
-        self.lens = lens
         self.description = f'Fiber with core radius {self.core_radius}, cladding radius {self.cladding_radius},' \
                            f'core refractive index {self.core_refractive_index}, cladding refractive index' \
                            f'{cladding_refractive_index} and intended wavelength {self.intended_wavelength}.'
@@ -73,7 +73,8 @@ class Fiber(OpticalElement):
         """
         if not (type(value) == astropy.units.quantity.Quantity and value.unit == u.meter):
             raise ValueError(f'Units of core radius must be specified in meters.')
-        if self.wavefront.extent_focal_plane_dimensionless * self.lens.focal_length / 2 < value:
+        if BaseWavefront.get_extent_focal_plane_meters(self.intended_wavelength, self.beam_diameter,
+                                                       self.lens) / 2 < value:
             raise ValueError(
                 f'core diameter {2 * value} must be smaller than the wavefront array width in meters '
                 f'{BaseWavefront.get_extent_focal_plane_meters(self.intended_wavelength, self.beam_diameter, self.lens)}')
@@ -104,7 +105,8 @@ class Fiber(OpticalElement):
                                         (np.sqrt(self.v_number).value, np.sqrt(self.v_number).value),
                                         self.v_number.value)
 
-        extent = BaseWavefront.get_extent_focal_plane_meters(self.lens) / 2
+        extent = BaseWavefront.get_extent_focal_plane_meters(self.intended_wavelength, self.beam_diameter,
+                                                             self.lens) / 2
         extent_linear_space = np.linspace(-extent, extent, self.number_of_pixels)
         X, Y = np.meshgrid(extent_linear_space, extent_linear_space)
 

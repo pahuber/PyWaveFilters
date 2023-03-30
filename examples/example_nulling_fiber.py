@@ -29,18 +29,20 @@ wavefront_2 = Wavefront(wavelength,
 focal_length = 0.008 * u.meter
 lens = Lens(focal_length)
 fiber_1 = Fiber(wavelength,
+                beam_diameter,
                 21e-6 * u.meter,
                 125e-6 * u.meter,
                 1.6,
                 1.59,
-                wavefront_1,
+                number_of_pixels,
                 lens)
 fiber_2 = Fiber(wavelength,
+                beam_diameter,
                 21e-6 * u.meter,
                 125e-6 * u.meter,
                 1.6,
                 1.59,
-                wavefront_2,
+                number_of_pixels,
                 lens)
 
 # Calculate null depth without filtering

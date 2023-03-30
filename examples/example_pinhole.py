@@ -24,7 +24,7 @@ focal_length = 0.008 * u.meter
 
 lens = Lens(focal_length)
 
-pinhole = Pinhole(1.22, wavefront)
+pinhole = Pinhole(1.22, beam_diameter, number_of_pixels)
 
 # Apply optical elements to wavefront and plot at each stage
 plot_initial_wavefront_error(wavefront)
