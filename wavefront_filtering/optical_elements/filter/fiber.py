@@ -3,10 +3,7 @@ import warnings
 import astropy
 import numpy as np
 from astropy import units as u
-from scipy.optimize import fsolve
 
-from wavefront_filtering.optical_elements.filter.fiber_optics.bessel import get_system_of_equations, \
-    get_mode_function
 from wavefront_filtering.optical_elements.lens import Lens
 from wavefront_filtering.optical_elements.optical_element import OpticalElement
 from wavefront_filtering.wavefronts.wavefront import BaseWavefront
@@ -96,14 +93,13 @@ class Fiber(OpticalElement):
 
     def get_fundamental_fiber_mode(self) -> np.ndarray:
         """
-        Return an array representing the cross-section of the fundamental fiber mode.
+        Return an array representing the cross-section of the fundamental fiber mode, using the Gaussian approximation
+        by Shaklan & Roddier 1988.
 
                 Returns:
                         Array representing the fundamental fiber mode
         """
-        u_variable, w_variable = fsolve(get_system_of_equations,
-                                        (np.sqrt(self.v_number).value, np.sqrt(self.v_number).value),
-                                        self.v_number.value)
+        gaussian_width = self.core_radius * (0.65 + 1.619 / self.v_number ** (3 / 2) + 2.879 / self.v_number ** 6)
 
         extent = BaseWavefront.get_extent_focal_plane_meters(self.intended_wavelength, self.beam_diameter,
                                                              self.lens) / 2
@@ -117,12 +113,12 @@ class Fiber(OpticalElement):
 
         for x in range(shape[0]):
             for y in range(shape[1]):
-                fundamental_fiber_mode[x][y] = get_mode_function(radii[x][y], angles[x][y], u_variable, w_variable,
-                                                                 self.core_radius)
+                fundamental_fiber_mode[x][y] = 1 / gaussian_width.value * np.exp(
+                    -radii[x][y].value ** 2 / gaussian_width.value ** 2)
 
         normalization_constant = 1 / np.sqrt(np.sum(abs(fundamental_fiber_mode) ** 2))
 
-        return normalization_constant * fundamental_fiber_mode
+        return normalization_constant * fundamental_fiber_mode * u.watt ** 0.5 / u.meter
 
     def get_coupling_efficiency(self, wavefront: BaseWavefront) -> float:
         """
@@ -133,11 +129,11 @@ class Fiber(OpticalElement):
         """
 
         coupling_efficiency = abs(
-            np.sum(self.fundamental_fiber_mode.conjugate() * wavefront.complex_amplitude)) ** 2 / (
+            np.sum(self.fundamental_fiber_mode * wavefront.complex_amplitude)) ** 2 / (
                                       np.sum(abs(self.fundamental_fiber_mode) ** 2) * np.sum(
                                   abs(wavefront.complex_amplitude) ** 2))
 
-        if coupling_efficiency <= 0.7:
+        if coupling_efficiency <= 0.4:
             warnings.warn(f'Coupling efficiency is only {coupling_efficiency * 100} %')
         if coupling_efficiency > 0.85:
             warnings.warn(
