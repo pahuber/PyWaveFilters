@@ -25,8 +25,7 @@ wavefront_2 = Wavefront(wavelength,
 # Define optical elements
 focal_length = 0.008 * u.meter
 lens = Lens(focal_length)
-pinhole_1 = Pinhole(1.22, beam_diameter, number_of_pixels)
-pinhole_2 = Pinhole(1.22, beam_diameter, number_of_pixels)
+pinhole = Pinhole(1.22, beam_diameter, number_of_pixels)
 
 # Calculate null depth without filtering
 wavefront_const_unfiltered = wavefront_1 + wavefront_2
@@ -40,8 +39,8 @@ print('Unfiltered Null Depth: ', null_depth_unfiltered)
 wavefront_1.apply(lens)
 wavefront_2.apply(lens)
 
-wavefront_1.apply(pinhole_1)
-wavefront_2.apply(pinhole_2)
+wavefront_1.apply(pinhole)
+wavefront_2.apply(pinhole)
 
 wavefront_1.apply(lens)
 wavefront_2.apply(lens)
