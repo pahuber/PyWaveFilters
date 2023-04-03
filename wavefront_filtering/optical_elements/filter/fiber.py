@@ -132,9 +132,6 @@ class Fiber(OpticalElement):
             np.sum(self.fundamental_fiber_mode * wavefront.complex_amplitude)) ** 2 / (
                                       np.sum(abs(self.fundamental_fiber_mode) ** 2) * np.sum(
                                   abs(wavefront.complex_amplitude) ** 2))
-
-        if coupling_efficiency <= 0.4:
-            warnings.warn(f'Coupling efficiency is only {coupling_efficiency * 100} %')
         if coupling_efficiency > 0.85:
             warnings.warn(
                 f'Coupling efficiency {coupling_efficiency * 100} % is larger than the theoretical limit.'
@@ -144,19 +141,21 @@ class Fiber(OpticalElement):
 
     def apply(self, wavefront: BaseWavefront):
         """
-        Implementation of the apply method of the parent class. Used to apply the optical element to the wavefront.
+        Implementation of the apply method of the parent class. Used to apply the optical element to the wavefront. Sets
+        the complex amplitude of the input wavefront to the (normalized) fiber mode, scaled by the coupling efficiency
+        and the initial amplitude
 
                 Parameters:
                         wavefront: Base wavefront object
         """
-
         if not (self.intended_wavelength == wavefront.wavelength and self.beam_diameter == wavefront.beam_diameter):
             raise Exception('Wavelength and beam diameter must match the ones from the wavefront')
         else:
             if not wavefront.is_in_pupil_plane:
                 self.coupling_efficiency = self.get_coupling_efficiency(wavefront)
-                wavefront.complex_amplitude = self.fundamental_fiber_mode * self.coupling_efficiency
-                # TODO: check correct output of complex amplitude, also in terms of units (sensible values?)
+                wavefront.complex_amplitude = self.fundamental_fiber_mode * np.sqrt(self.coupling_efficiency) * np.sqrt(
+                    np.sum(wavefront.intensity))
+                # TODO: check correct output of complex amplitude
                 wavefront.has_fiber_been_applied = True
             else:
                 raise Exception('Fibers can only be applied to wavefronts in the focal plane')
