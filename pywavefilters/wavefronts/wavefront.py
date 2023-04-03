@@ -2,8 +2,8 @@ import astropy
 import numpy as np
 from astropy import units as u
 
-from wavefront_filtering.optical_elements.optical_element import OpticalElement
-from wavefront_filtering.wavefronts.zernike import get_zernike_polynomial
+from pywavefilters.optical_elements.optical_element import OpticalElement
+from pywavefilters.wavefronts.zernike import get_zernike_polynomial
 
 
 class BaseWavefront:
@@ -260,7 +260,7 @@ class Wavefront(BaseWavefront):
         complex_amplitude = self.aperture_function * np.exp(
             -2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
         normalization_constant = 1 / np.sqrt(np.sum(abs(complex_amplitude) ** 2))
-        return normalization_constant * complex_amplitude
+        return normalization_constant * complex_amplitude * u.watt ** 0.5 / u.meter
 
 
 class CombinedWavefront(BaseWavefront):

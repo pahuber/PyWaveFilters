@@ -2,7 +2,7 @@ from math import factorial
 
 import numpy as np
 
-from wavefront_filtering.util.math import get_kronecker_delta
+from pywavefilters.util.math import get_kronecker_delta
 
 
 def get_noll_index(index_n: int, index_m: int) -> int:
