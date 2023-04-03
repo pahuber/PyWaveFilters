@@ -1,9 +1,9 @@
 import numpy as np
 from astropy import units as u
 
-from wavefront_filtering.optical_elements.filter.fiber import Fiber
-from wavefront_filtering.optical_elements.lens import Lens
-from wavefront_filtering.wavefronts.wavefront import Wavefront
+from pywavefilters.optical_elements.filter.fiber import Fiber
+from pywavefilters.optical_elements.lens import Lens
+from pywavefilters.wavefronts.wavefront import Wavefront
 
 # Define wavefront
 wavelength = 15e-6 * u.meter

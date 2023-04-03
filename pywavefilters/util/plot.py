@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 
-from wavefront_filtering.wavefronts.wavefront import BaseWavefront, Wavefront
+from pywavefilters.wavefronts.wavefront import BaseWavefront, Wavefront
 
 
 def plot_intensity_pupil_plane(wavefront: BaseWavefront, title=None):

@@ -4,9 +4,9 @@ import astropy
 import numpy as np
 from astropy import units as u
 
-from wavefront_filtering.optical_elements.lens import Lens
-from wavefront_filtering.optical_elements.optical_element import OpticalElement
-from wavefront_filtering.wavefronts.wavefront import BaseWavefront
+from pywavefilters.optical_elements.lens import Lens
+from pywavefilters.optical_elements.optical_element import OpticalElement
+from pywavefilters.wavefronts.wavefront import BaseWavefront
 
 
 class Fiber(OpticalElement):

@@ -2,8 +2,8 @@ import astropy
 import numpy as np
 from astropy import units as u
 
-from wavefront_filtering.optical_elements.optical_element import OpticalElement
-from wavefront_filtering.wavefronts.zernike import get_zernike_polynomial
+from pywavefilters.optical_elements.optical_element import OpticalElement
+from pywavefilters.wavefronts.zernike import get_zernike_polynomial
 
 
 class BaseWavefront:
