@@ -154,7 +154,7 @@ class Fiber(OpticalElement):
             if not wavefront.is_in_pupil_plane:
                 self.coupling_efficiency = self.get_coupling_efficiency(wavefront)
                 wavefront.complex_amplitude = self.fundamental_fiber_mode * np.sqrt(self.coupling_efficiency) * np.sqrt(
-                    np.sum(wavefront.intensity))
+                    np.sum(wavefront.intensity.value))
                 # TODO: check correct output of complex amplitude
                 wavefront.has_fiber_been_applied = True
             else:
