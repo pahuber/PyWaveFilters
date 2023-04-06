@@ -79,6 +79,8 @@ def get_radial_zernike_polynomial(index_n: int,
                     factorial(int((index_n - index_m) / 2 - index_k))) * \
                            (radial_map / maximum_radius) ** (index_n - 2 * index_k)
 
+        radial_part[radial_part > 1] = 0
+
         return radial_part
 
     elif (index_n - index_m) % 2 != 0:

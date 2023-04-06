@@ -77,6 +77,7 @@ def plot_initial_wavefront_error(wavefront: Wavefront, title=None):
                     title: Optional title of the plot
     """
     plt.imshow(wavefront.initial_wavefront_error.value)
+    plt.colorbar()
 
     if title is None:
         plt.title('Initial Wavefront Error')

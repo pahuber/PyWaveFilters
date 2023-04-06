@@ -259,7 +259,9 @@ class Wavefront(BaseWavefront):
         """
         complex_amplitude = self.aperture_function * np.exp(
             -2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
+        # TODO: check sign
         normalization_constant = 1 / np.sqrt(np.sum(abs(complex_amplitude) ** 2))
+
         return normalization_constant * complex_amplitude * u.watt ** 0.5 / u.meter
 
 
