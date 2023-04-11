@@ -226,9 +226,7 @@ class Wavefront(BaseWavefront):
         self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         self._aperture_radius = self.beam_diameter / 2
 
-        gaussian_intensity_profile = np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self._aperture_radius) ** 2)
-
-        return gaussian_intensity_profile * u.watt ** 0.5 / u.meter * (
+        return 1 * u.watt ** 0.5 / u.meter * (
                 self._x_map ** 2 + self._y_map ** 2 < self._aperture_radius ** 2).astype(
             complex)
 
@@ -260,9 +258,11 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing the complex amplitude.
         """
-        complex_amplitude = self.aperture_function * np.exp(
+        gaussian_intensity_profile = np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self._aperture_radius) ** 2)
+
+        complex_amplitude = gaussian_intensity_profile * self.aperture_function * np.exp(
             2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
-        # TODO: check sign
+
         normalization_constant = 1 / np.sqrt(np.sum(abs(complex_amplitude) ** 2))
 
         return normalization_constant * complex_amplitude * u.watt ** 0.5 / u.meter
