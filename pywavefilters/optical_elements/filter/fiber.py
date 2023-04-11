@@ -1,5 +1,3 @@
-import warnings
-
 import astropy
 import numpy as np
 from astropy import units as u
@@ -127,16 +125,9 @@ class Fiber(OpticalElement):
                 Returns:
                         A float corresponding to the coupling efficiency
         """
-
-        coupling_efficiency = abs(
-            np.sum(self.fundamental_fiber_mode * wavefront.complex_amplitude)) ** 2 / (
-                                      np.sum(abs(self.fundamental_fiber_mode) ** 2) * np.sum(
-                                  abs(wavefront.complex_amplitude) ** 2))
-        if coupling_efficiency > 0.85:
-            warnings.warn(
-                f'Coupling efficiency {coupling_efficiency * 100} % is larger than the theoretical limit.'
-                f'Something must be wrong')
-
+        coupling_efficiency = np.sum(self.fundamental_fiber_mode * wavefront.complex_amplitude) / (
+                np.sqrt(np.sum(abs(self.fundamental_fiber_mode) ** 2)) * np.sqrt(np.sum(
+            abs(wavefront.complex_amplitude) ** 2)))
         return coupling_efficiency
 
     def apply(self, wavefront: BaseWavefront):
@@ -153,7 +144,7 @@ class Fiber(OpticalElement):
         else:
             if not wavefront.is_in_pupil_plane:
                 self.coupling_efficiency = self.get_coupling_efficiency(wavefront)
-                wavefront.complex_amplitude = self.fundamental_fiber_mode * np.sqrt(self.coupling_efficiency) * np.sqrt(
+                wavefront.complex_amplitude = self.fundamental_fiber_mode * self.coupling_efficiency * np.sqrt(
                     np.sum(wavefront.intensity.value))
                 # TODO: check correct output of complex amplitude
                 wavefront.has_fiber_been_applied = True
