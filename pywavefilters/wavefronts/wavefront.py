@@ -226,7 +226,11 @@ class Wavefront(BaseWavefront):
         self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         self._aperture_radius = self.beam_diameter / 2
 
-        return 1 * u.watt ** 0.5 / u.meter * (self._x_map ** 2 + self._y_map ** 2 < self._aperture_radius ** 2).astype(
+        gauss = np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self.beam_diameter / 2) ** 2)
+        # TODO: implement gaussian beams
+
+        return 1 * u.watt ** 0.5 / u.meter * (
+                self._x_map ** 2 + self._y_map ** 2 < self._aperture_radius ** 2).astype(
             complex)
 
     def get_wavefront_error(self) -> np.ndarray:
