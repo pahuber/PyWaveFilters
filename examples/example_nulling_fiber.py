@@ -10,7 +10,7 @@ wavelength = 15e-6 * u.meter
 zernike_modes_1 = [(5, wavelength / 100)]
 zernike_modes_2 = [(6, wavelength / 100)]
 beam_diameter = 0.003 * u.meter
-number_of_pixels = 400
+number_of_pixels = 200
 
 wavefront_1 = Wavefront(wavelength,
                         zernike_modes_1,
@@ -59,8 +59,8 @@ wavefront_dest.apply(fiber)
 # plt.legend()
 # plt.show()
 
-wavefront_1.apply(lens)
-wavefront_2.apply(lens)
+wavefront_const.apply(lens)
+wavefront_dest.apply(lens)
 
 # Calculate null depth and throughput
 null_depth = np.sum(wavefront_dest.intensity) / np.sum(wavefront_const.intensity)
