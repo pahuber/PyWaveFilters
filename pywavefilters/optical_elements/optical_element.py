@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class OpticalElement(ABC):
+class BaseOpticalElement(ABC):
     """
     Abstract class to represent optical elements.
     """

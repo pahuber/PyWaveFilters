@@ -2,7 +2,7 @@ import astropy
 import numpy as np
 from astropy import units as u
 
-from pywavefilters.optical_elements.optical_element import OpticalElement
+from pywavefilters.optical_elements.optical_element import BaseOpticalElement
 from pywavefilters.wavefronts.zernike import get_zernike_polynomial
 
 
@@ -27,7 +27,7 @@ class BaseWavefront:
         return beam_diameter / BaseWavefront._length_per_pixel
 
     @staticmethod
-    def get_extent_focal_plane_meters(wavelength: float, beam_diameter: float, lens: OpticalElement) -> float:
+    def get_extent_focal_plane_meters(wavelength: float, beam_diameter: float, lens: BaseOpticalElement) -> float:
         """
         Return a value corresponding to the full extent of the array in meters.
 
@@ -118,7 +118,7 @@ class BaseWavefront:
         """
         return abs(self.complex_amplitude) ** 2
 
-    def apply(self, optical_element: OpticalElement):
+    def apply(self, optical_element: BaseOpticalElement):
         """
         Apply an optical element.
         """

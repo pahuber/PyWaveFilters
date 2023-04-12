@@ -2,11 +2,11 @@ import astropy
 import numpy as np
 from astropy import units as u
 
-from pywavefilters.optical_elements.optical_element import OpticalElement
+from pywavefilters.optical_elements.optical_element import BaseOpticalElement
 from pywavefilters.wavefronts.wavefront import BaseWavefront
 
 
-class Pinhole(OpticalElement):
+class Pinhole(BaseOpticalElement):
     """
     Class representing a pinhole, which can be used to filter a wavefront in the focal plane.
     """

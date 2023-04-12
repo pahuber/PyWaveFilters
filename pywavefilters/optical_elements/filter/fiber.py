@@ -3,11 +3,11 @@ import numpy as np
 from astropy import units as u
 
 from pywavefilters.optical_elements.lens import Lens
-from pywavefilters.optical_elements.optical_element import OpticalElement
+from pywavefilters.optical_elements.optical_element import BaseOpticalElement
 from pywavefilters.wavefronts.wavefront import BaseWavefront
 
 
-class Fiber(OpticalElement):
+class Fiber(BaseOpticalElement):
     """
     Class representing an optical fiber, which can be used to filter a wavefront in the focal plane.
     """

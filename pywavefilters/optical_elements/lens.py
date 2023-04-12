@@ -2,11 +2,11 @@ import astropy
 from astropy import units as u
 from numpy.fft import fft2, fftshift, ifft2
 
-from pywavefilters.optical_elements.optical_element import OpticalElement
+from pywavefilters.optical_elements.optical_element import BaseOpticalElement
 from pywavefilters.wavefronts.wavefront import BaseWavefront
 
 
-class Lens(OpticalElement):
+class Lens(BaseOpticalElement):
     """
     Class representing a lens, which can be used to transform a wavefront from aperture plane to focal plane or
     vice-versa.
