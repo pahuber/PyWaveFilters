@@ -50,4 +50,4 @@ class PhaseShifter(BaseOpticalElement):
                 Parameters:
                         wavefront: Base wavefront object
         """
-        wavefront.complex_amplitude *= np.exp(-1j * self.phase_difference.value)
+        wavefront.complex_amplitude *= np.exp(1j * self.phase_difference.value)
