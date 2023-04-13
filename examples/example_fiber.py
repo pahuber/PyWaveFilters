@@ -10,7 +10,7 @@ from pywavefilters.wavefronts.wavefront import Wavefront
 wavelength = 1e-5 * u.meter
 zernike_modes = [(4, wavelength / 10)]
 beam_diameter = 0.003 * u.meter
-number_of_pixels = 100
+number_of_pixels = 101
 
 wavefront = Wavefront(wavelength,
                       zernike_modes,
