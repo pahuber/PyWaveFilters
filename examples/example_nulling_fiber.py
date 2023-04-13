@@ -3,6 +3,7 @@ from astropy import units as u
 
 from pywavefilters.optical_elements.filter.fiber import Fiber
 from pywavefilters.optical_elements.lens import Lens
+from pywavefilters.optical_elements.phase_shifter import PhaseShifter
 from pywavefilters.wavefronts.wavefront import Wavefront
 
 # Define wavefront
@@ -43,10 +44,11 @@ wavefront_1.apply(fiber)
 wavefront_2.apply(fiber)
 
 # Remove piston difference with delay line
-piston_diff = np.angle(wavefront_1.complex_amplitude) - np.angle(wavefront_2.complex_amplitude)
-wavefront_1.complex_amplitude *= np.exp(-1j * piston_diff.value)
+piston_difference = wavefront_1.phase - wavefront_2.phase
+phase_shifter = PhaseShifter(piston_difference)
+wavefront_2.apply(phase_shifter)
 
-# Combine wavefronts and normalize
+# Combine wavefronts
 wavefront_const = wavefront_1 + wavefront_2
 wavefront_dest = wavefront_1 - wavefront_2
 
