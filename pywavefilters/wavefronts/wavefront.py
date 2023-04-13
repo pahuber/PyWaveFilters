@@ -220,8 +220,8 @@ class Wavefront(BaseWavefront):
         """
         Setter method for the number of pixels.
         """
-        if not (type(value) == int and value > 0):
-            raise ValueError(f'Number of pixels must be a positive integer.')
+        if not (type(value) == int and value > 0 and value % 2 == 1):
+            raise ValueError(f'Number of pixels must be an odd, positive integer.')
         self._number_of_pixels = value
 
     def get_aperture_function(self) -> np.ndarray:
