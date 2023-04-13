@@ -1,6 +1,6 @@
 import astropy
 from astropy import units as u
-from numpy.fft import fft2, fftshift, ifft2
+from numpy.fft import fft2, fftshift, ifft2, ifftshift
 
 from pywavefilters.optical_elements.optical_element import BaseOpticalElement
 from pywavefilters.wavefronts.wavefront import BaseWavefront
@@ -50,8 +50,7 @@ class Lens(BaseOpticalElement):
         """
         # TODO: double check if phase behaviour is correct after lens transforms
         if wavefront.is_in_pupil_plane:
-            wavefront.complex_amplitude = fftshift(wavefront.complex_amplitude)
-            wavefront.complex_amplitude = fftshift(fft2(wavefront.complex_amplitude))
+            wavefront.complex_amplitude = fftshift(fft2(ifftshift(wavefront.complex_amplitude)))
 
             # Normalize by number of pixels to make independent of amount of pixels
             wavefront.complex_amplitude /= wavefront.number_of_pixels
@@ -60,8 +59,7 @@ class Lens(BaseOpticalElement):
             wavefront.extent_focal_plane_meters = wavefront.get_extent_focal_plane_meters(wavefront.wavelength,
                                                                                           wavefront.beam_diameter, self)
         else:
-            wavefront.complex_amplitude = fftshift(wavefront.complex_amplitude)
-            wavefront.complex_amplitude = fftshift(ifft2(wavefront.complex_amplitude))
+            wavefront.complex_amplitude = fftshift(ifft2(ifftshift(wavefront.complex_amplitude)))
 
             # Normalize by number of pixels to make independent of amount of pixels
             wavefront.complex_amplitude *= wavefront.number_of_pixels
