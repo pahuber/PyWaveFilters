@@ -109,9 +109,19 @@ class BaseWavefront:
                                      self.has_fiber_been_applied)
 
     @property
+    def phase(self) -> np.ndarray:
+        """
+        Return the phase of the complex amplitude.
+
+                Returns:
+                        Array containing phase
+        """
+        return np.angle(self.complex_amplitude)
+
+    @property
     def intensity(self) -> np.ndarray:
         """
-        Return the intensity as a function of the complex amplitude.
+        Return the intensity of the complex amplitude.
 
                 Returns:
                         Array containing intensity
