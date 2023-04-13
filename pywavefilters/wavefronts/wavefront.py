@@ -109,9 +109,19 @@ class BaseWavefront:
                                      self.has_fiber_been_applied)
 
     @property
+    def phase(self) -> np.ndarray:
+        """
+        Return the phase of the complex amplitude.
+
+                Returns:
+                        Array containing phase
+        """
+        return np.angle(self.complex_amplitude)
+
+    @property
     def intensity(self) -> np.ndarray:
         """
-        Return the intensity as a function of the complex amplitude.
+        Return the intensity of the complex amplitude.
 
                 Returns:
                         Array containing intensity
@@ -210,8 +220,8 @@ class Wavefront(BaseWavefront):
         """
         Setter method for the number of pixels.
         """
-        if not (type(value) == int and value > 0):
-            raise ValueError(f'Number of pixels must be a positive integer.')
+        if not (type(value) == int and value > 0 and value % 2 == 1):
+            raise ValueError(f'Number of pixels must be an odd, positive integer.')
         self._number_of_pixels = value
 
     def get_aperture_function(self) -> np.ndarray:

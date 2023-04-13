@@ -10,7 +10,7 @@ wavelength = 15e-6 * u.meter
 zernike_modes_1 = [(5, 0 * wavelength / 100)]
 zernike_modes_2 = [(6, wavelength / 100)]
 beam_diameter = 0.003 * u.meter
-number_of_pixels = 400
+number_of_pixels = 401
 
 wavefront_1 = Wavefront(wavelength,
                         zernike_modes_1,
