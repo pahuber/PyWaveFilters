@@ -1,7 +1,6 @@
 import astropy
 import numpy as np
 from astropy import units as u
-from matplotlib import pyplot as plt
 
 from pywavefilters.optical_elements.optical_element import BaseOpticalElement
 from pywavefilters.wavefronts.zernike import get_zernike_polynomial
@@ -23,7 +22,7 @@ class BaseWavefront:
                 Returns:
                         Value corresponding to the full extent in dimensionless units
         """
-        return BaseWavefront._chirp_z_maximum_frequency / (2 * np.pi)
+        return BaseWavefront._chirp_z_maximum_frequency / np.pi
 
     @staticmethod
     def get_extent_focal_plane_meters(wavelength: float, beam_diameter: float, lens: BaseOpticalElement) -> float:
@@ -258,8 +257,6 @@ class Wavefront(BaseWavefront):
             wavefront_error += mode_coefficient * get_zernike_polynomial(zernike_mode_index, radial_map, angular_map,
                                                                          self._aperture_radius)
 
-        plt.imshow(wavefront_error.value)
-        plt.show()
         return wavefront_error
 
     def get_initial_complex_amplitude(self) -> np.ndarray:
@@ -269,7 +266,8 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing the complex amplitude.
         """
-        gaussian_intensity_profile = np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self._aperture_radius) ** 2)
+        # TODO: reset to gaussian
+        gaussian_intensity_profile = 1  # np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self._aperture_radius) ** 2)
 
         complex_amplitude = gaussian_intensity_profile * self.aperture_function * np.exp(
             2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
