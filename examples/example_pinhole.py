@@ -8,9 +8,9 @@ from pywavefilters.wavefronts.wavefront import Wavefront
 
 # Define wavefront
 wavelength = 1e-5 * u.meter
-zernike_modes = [(4, wavelength / 10)]
+zernike_modes = [(6, wavelength / 10)]
 beam_diameter = 0.003 * u.meter
-number_of_pixels = 101
+number_of_pixels = 201
 
 wavefront = Wavefront(wavelength,
                       zernike_modes,
@@ -36,7 +36,3 @@ plot_intensity_focal_plane(wavefront, dimensionless=True)
 wavefront.apply(pinhole)
 
 plot_intensity_focal_plane(wavefront, dimensionless=True, title='Intensity Focal Plane After Pinhole')
-
-wavefront.apply(lens)
-
-plot_intensity_pupil_plane(wavefront)
