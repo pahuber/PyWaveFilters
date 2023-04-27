@@ -72,14 +72,14 @@ def get_radial_zernike_polynomial(index_n: int,
 
     if (index_n - index_m) % 2 == 0:
         radial_part = 0
-        for index_k in np.arange(0, (index_m - index_m) / 2 + 1, 1):
+        for index_k in np.arange(0, (index_n - index_m) / 2 + 1, 1):
             index_k = int(index_k)
             radial_part += ((-1) ** index_k * factorial(int(index_n - index_k))) / (
                     factorial(index_k) * factorial(int((index_n + index_m) / 2 - index_k)) *
                     factorial(int((index_n - index_m) / 2 - index_k))) * \
                            (radial_map / maximum_radius) ** (index_n - 2 * index_k)
-
-        radial_part[radial_map > maximum_radius] = 0
+        radial_part[radial_map / maximum_radius == 1] = 1
+        radial_part[radial_map / maximum_radius > 1] = 0
 
         return radial_part
 
