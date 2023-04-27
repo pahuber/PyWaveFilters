@@ -266,8 +266,7 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing the complex amplitude.
         """
-        # TODO: reset to gaussian
-        gaussian_intensity_profile = 1  # np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self._aperture_radius) ** 2)
+        gaussian_intensity_profile = np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self._aperture_radius) ** 2)
 
         complex_amplitude = gaussian_intensity_profile * self.aperture_function * np.exp(
             2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
