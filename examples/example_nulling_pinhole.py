@@ -27,35 +27,23 @@ focal_length = 0.003 * u.meter
 lens = Lens(focal_length)
 pinhole = Pinhole(1.22, beam_diameter, number_of_pixels)
 
-# Combine wavefronts and normalize
+# Combine wavefronts
 wavefront_const = wavefront_1 + wavefront_2
 wavefront_dest = wavefront_1 - wavefront_2
-
-intensity_unfiltered = wavefront_const.intensity
 
 # Apply optical elements to wavefronts
 wavefront_const.apply(lens)
 wavefront_dest.apply(lens)
 
-# plt.plot(wavefront_const.intensity.value[number_of_pixels // 2], label='co')
-# plt.plot(wavefront_dest.intensity.value[number_of_pixels // 2], label='de')
-# plt.legend()
-# plt.show()
+intensity_unfiltered = wavefront_const.intensity
 
 wavefront_const.apply(pinhole)
 wavefront_dest.apply(pinhole)
-#
-# plt.plot(wavefront_const.intensity.value[number_of_pixels // 2], label='co')
-# plt.plot(wavefront_dest.intensity.value[number_of_pixels // 2], label='de')
-# plt.legend()
-# plt.show()
-
-wavefront_const.apply(lens)
-wavefront_dest.apply(lens)
 
 # Calculate null depth and throughput
 null_depth = np.sum(wavefront_dest.intensity) / np.sum(wavefront_const.intensity)
 intensity_filtered = wavefront_const.intensity
 throughput = np.sum(intensity_filtered) / np.sum(intensity_unfiltered)
+
 print('Null Depth: ', null_depth)
 print('Throughput: ', throughput)

@@ -11,20 +11,18 @@ class BaseWavefront:
     Base class to represent wavefronts.
     """
 
-    _length_per_pixel = 300e-6 * u.meter
+    _chirp_z_maximum_frequency = 20
 
     @staticmethod
-    def get_extent_focal_plane_dimensionless(beam_diameter: float):
+    def get_extent_focal_plane_dimensionless():
         """
-        Return a value corresponding to the full extent of the array in wavelength over aperture diameter.
-
-                Parameters:
-                        beam_diameter: Beam diameter of the wavefront
+        Return a value corresponding to the full extent of the array in the focal plane in units of wavelength over
+        aperture diameter.
 
                 Returns:
                         Value corresponding to the full extent in dimensionless units
         """
-        return beam_diameter / BaseWavefront._length_per_pixel
+        return BaseWavefront._chirp_z_maximum_frequency / np.pi
 
     @staticmethod
     def get_extent_focal_plane_meters(wavelength: float, beam_diameter: float, lens: BaseOpticalElement) -> float:
@@ -39,8 +37,7 @@ class BaseWavefront:
                 Returns:
                         Value corresponding to the full extent in meters
         """
-        return BaseWavefront.get_extent_focal_plane_dimensionless(
-            beam_diameter) / beam_diameter * lens.focal_length * wavelength
+        return BaseWavefront.get_extent_focal_plane_dimensionless() / beam_diameter * lens.focal_length * wavelength
 
     def __init__(self):
         """
@@ -160,8 +157,8 @@ class Wavefront(BaseWavefront):
         self.beam_diameter = beam_diameter
         self.number_of_pixels = number_of_pixels
 
-        self.extent_pupil_plane_meters = number_of_pixels * BaseWavefront._length_per_pixel
-        self.extent_focal_plane_dimensionless = self.get_extent_focal_plane_dimensionless(self.beam_diameter)
+        self.extent_pupil_plane_meters = self.beam_diameter
+        self.extent_focal_plane_dimensionless = self.get_extent_focal_plane_dimensionless()
         self.aperture_function = self.get_aperture_function()
         self.initial_wavefront_error = self.get_wavefront_error()
         self.complex_amplitude = self.get_initial_complex_amplitude()
@@ -259,6 +256,7 @@ class Wavefront(BaseWavefront):
             mode_coefficient = element[1]
             wavefront_error += mode_coefficient * get_zernike_polynomial(zernike_mode_index, radial_map, angular_map,
                                                                          self._aperture_radius)
+
         return wavefront_error
 
     def get_initial_complex_amplitude(self) -> np.ndarray:

@@ -35,11 +35,12 @@ fiber = Fiber(wavelength,
               number_of_pixels,
               lens)
 
-intensity_unfiltered = (wavefront_1 + wavefront_2).intensity
-
 # Transform to focal plane and apply fibers
 wavefront_1.apply(lens)
 wavefront_2.apply(lens)
+
+intensity_unfiltered = (wavefront_1 + wavefront_2).intensity
+
 wavefront_1.apply(fiber)
 wavefront_2.apply(fiber)
 
@@ -52,13 +53,10 @@ wavefront_2.apply(phase_shifter)
 wavefront_const = wavefront_1 + wavefront_2
 wavefront_dest = wavefront_1 - wavefront_2
 
-# Transform to output plane
-wavefront_const.apply(lens)
-wavefront_dest.apply(lens)
-
 # Calculate null depth and throughput
 null_depth = np.sum(wavefront_dest.intensity) / np.sum(wavefront_const.intensity)
 intensity_filtered = wavefront_const.intensity
 throughput = np.sum(intensity_filtered) / np.sum(intensity_unfiltered)
+
 print('Null Depth: ', null_depth)
 print('Throughput: ', throughput)

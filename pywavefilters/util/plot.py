@@ -44,7 +44,7 @@ def plot_intensity_focal_plane(wavefront: BaseWavefront, title=None, dimensionle
         raise Exception('Wavefront must be in focal plane')
 
     if dimensionless:
-        half_extent = wavefront.extent_focal_plane_dimensionless.value / 2
+        half_extent = wavefront.extent_focal_plane_dimensionless / 2
     else:
         half_extent = wavefront.extent_focal_plane_meters.value / 2
 
