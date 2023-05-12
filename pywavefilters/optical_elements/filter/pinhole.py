@@ -11,18 +11,18 @@ class Pinhole(BaseOpticalElement):
     Class representing a pinhole, which can be used to filter a wavefront in the focal plane.
     """
 
-    def __init__(self, aperture_radius: float, beam_diameter: float, number_of_pixels: int):
+    def __init__(self, aperture_radius: float, beam_diameter: float, grid_size: int):
         """
         Constructor for pinhole object. Needs an aperture radius.
 
                 Parameters:
                         aperture_radius: Pinhole radius in wavelength/aperture diameter
                         beam_diameter: Beam diameter of the wavefronts to be filtered
-                        number_of_pixels: Number of pixels of one array dimension
+                        grid_size: Grid size
         """
         self.aperture_radius = aperture_radius
         self.beam_diameter = beam_diameter
-        self.number_of_pixels = number_of_pixels
+        self.grid_size = grid_size
         self.description = f'Pinhole with aperture diameter {self.aperture_radius}.'
         self.aperture_function = self.get_aperture_function()
 
@@ -53,7 +53,7 @@ class Pinhole(BaseOpticalElement):
                         Array containing circular aperture.
         """
         extent = BaseWavefront.get_extent_focal_plane_dimensionless() / 2
-        extent_linear_space = np.linspace(-extent, extent, self.number_of_pixels)
+        extent_linear_space = np.linspace(-extent, extent, self.grid_size)
         x_map, y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         return x_map ** 2 + y_map ** 2 < self.aperture_radius ** 2
 

@@ -19,7 +19,7 @@ class Fiber(BaseOpticalElement):
                  cladding_radius: float,
                  core_refractive_index: float,
                  cladding_refractive_index: float,
-                 number_of_pixels: int,
+                 grid_size: int,
                  lens: Lens):
         """
         Constructor for fiber object.
@@ -31,7 +31,7 @@ class Fiber(BaseOpticalElement):
                         cladding_radius: Cladding radius of the fiber in meters
                         core_refractive_index: Refractive index of the core
                         cladding_refractive_index: Refractive index of the cladding
-                        number_of_pixels: Number of pixels of one array dimension
+                        grid_size: Grid size
                         lens: Lens used for coupling
 
         """
@@ -42,7 +42,7 @@ class Fiber(BaseOpticalElement):
         self.cladding_radius = cladding_radius
         self.core_refractive_index = core_refractive_index
         self.cladding_refractive_index = cladding_refractive_index
-        self.number_of_pixels = number_of_pixels
+        self.grid_size = grid_size
         self.description = f'Fiber with core radius {self.core_radius}, cladding radius {self.cladding_radius},' \
                            f'core refractive index {self.core_refractive_index}, cladding refractive index' \
                            f'{cladding_refractive_index} and intended wavelength {self.intended_wavelength}.'
@@ -101,12 +101,12 @@ class Fiber(BaseOpticalElement):
 
         extent = BaseWavefront.get_extent_focal_plane_meters(self.intended_wavelength, self.beam_diameter,
                                                              self.lens) / 2
-        extent_linear_space = np.linspace(-extent, extent, self.number_of_pixels)
+        extent_linear_space = np.linspace(-extent, extent, self.grid_size)
         X, Y = np.meshgrid(extent_linear_space, extent_linear_space)
 
         angles = np.arctan2(Y, X)
         radii = np.sqrt(X ** 2 + Y ** 2)
-        shape = (self.number_of_pixels, self.number_of_pixels)
+        shape = (self.grid_size, self.grid_size)
         fundamental_fiber_mode = np.zeros(shape)
 
         for x in range(shape[0]):

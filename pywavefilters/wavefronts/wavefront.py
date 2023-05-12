@@ -11,7 +11,85 @@ class BaseWavefront:
     Base class to represent wavefronts.
     """
 
-    _chirp_z_maximum_frequency = 20
+    _chirp_z_maximum_frequency = 100
+
+    def __init__(self):
+        """
+        Constructor for base wavefront object.
+        """
+        self.wavelength = 0 * u.meter
+        self.beam_diameter = 0 * u.meter
+        self.amplitude = None
+        self.phase = None
+        self.complex_amplitude = None
+        self.is_in_pupil_plane = None
+        self.extent_pupil_plane_meters = None
+        self.extent_focal_plane_dimensionless = None
+        self.extent_focal_plane_meters = None  # Is reset to None after leaving the focal plane
+        self.grid_size = 1
+        self.has_fiber_been_applied = None
+
+    def __add__(self, other_wavefront):
+        """
+        Method to add two base wavefront together.
+
+                Parameters:
+                        other_wavefront: Base wavefront object to be added
+                Returns:
+                        Combined wavefront object
+        """
+        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
+            raise Exception('Wavefronts must both be in pupil or in focal plane')
+        elif self.beam_diameter != other_wavefront.beam_diameter:
+            raise Exception('Wavefronts must have same beam diameter')
+        elif self.wavelength != other_wavefront.wavelength:
+            raise Exception('Wavefronts must have same wavelengths')
+        else:
+            return CombinedWavefront(self.wavelength,
+                                     self.beam_diameter,
+                                     self.complex_amplitude + other_wavefront.complex_amplitude,
+                                     self.is_in_pupil_plane,
+                                     self.extent_pupil_plane_meters,
+                                     self.extent_focal_plane_dimensionless,
+                                     self.extent_focal_plane_meters,
+                                     self.grid_size,
+                                     self.has_fiber_been_applied)
+
+    def __sub__(self, other_wavefront):
+        """
+        Method to subtract one base wavefront from another.
+
+                Parameters:
+                        other_wavefront: Base wavefront object to be subtracted
+                Returns:
+                        Combined, i.e. subtracted, wavefront object
+        """
+        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
+            raise Exception('Wavefronts must both be in pupil or in focal plane')
+        elif self.beam_diameter != other_wavefront.beam_diameter:
+            raise Exception('Wavefronts must have same beam diameter')
+        elif self.wavelength != other_wavefront.wavelength:
+            raise Exception('Wavefronts must have same wavelengths')
+        else:
+            return CombinedWavefront(self.wavelength,
+                                     self.beam_diameter,
+                                     self.complex_amplitude - other_wavefront.complex_amplitude,
+                                     self.is_in_pupil_plane,
+                                     self.extent_pupil_plane_meters,
+                                     self.extent_focal_plane_dimensionless,
+                                     self.extent_focal_plane_meters,
+                                     self.grid_size,
+                                     self.has_fiber_been_applied)
+
+    @property
+    def intensity(self) -> np.ndarray:
+        """
+        Return the intensity of the complex amplitude.
+
+                Returns:
+                        Array containing intensity
+        """
+        return abs(self.complex_amplitude) ** 2
 
     @staticmethod
     def get_extent_focal_plane_dimensionless():
@@ -39,92 +117,6 @@ class BaseWavefront:
         """
         return BaseWavefront.get_extent_focal_plane_dimensionless() / beam_diameter * lens.focal_length * wavelength
 
-    def __init__(self):
-        """
-        Constructor for base wavefront object.
-        """
-        self.wavelength = 0 * u.meter
-        self.beam_diameter = 0 * u.meter
-        self.complex_amplitude = None
-        self.is_in_pupil_plane = None
-        self.extent_pupil_plane_meters = None
-        self.extent_focal_plane_dimensionless = None
-        self.extent_focal_plane_meters = None  # Is reset to None after leaving the focal plane
-        self.number_of_pixels = 1
-        self.has_fiber_been_applied = None
-
-    def __add__(self, other_wavefront):
-        """
-        Method to add two base wavefront together.
-
-                Parameters:
-                        other_wavefront: Base wavefront object to be added
-                Returns:
-                        Combined wavefront object
-        """
-        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
-            raise Exception('Wavefronts must both be in pupil or in focal plane')
-        elif self.beam_diameter != other_wavefront.beam_diameter:
-            raise Exception('Wavefronts must have same beam diameter')
-        elif self.wavelength != other_wavefront.wavelength:
-            raise Exception('Wavefronts must have same wavelengths')
-        else:
-            return CombinedWavefront(self.wavelength,
-                                     self.beam_diameter,
-                                     self.complex_amplitude + other_wavefront.complex_amplitude,
-                                     self.is_in_pupil_plane,
-                                     self.extent_pupil_plane_meters,
-                                     self.extent_focal_plane_dimensionless,
-                                     self.extent_focal_plane_meters,
-                                     self.number_of_pixels,
-                                     self.has_fiber_been_applied)
-
-    def __sub__(self, other_wavefront):
-        """
-        Method to subtract one base wavefront from another.
-
-                Parameters:
-                        other_wavefront: Base wavefront object to be subtracted
-                Returns:
-                        Combined, i.e. subtracted, wavefront object
-        """
-        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
-            raise Exception('Wavefronts must both be in pupil or in focal plane')
-        elif self.beam_diameter != other_wavefront.beam_diameter:
-            raise Exception('Wavefronts must have same beam diameter')
-        elif self.wavelength != other_wavefront.wavelength:
-            raise Exception('Wavefronts must have same wavelengths')
-        else:
-            return CombinedWavefront(self.wavelength,
-                                     self.beam_diameter,
-                                     self.complex_amplitude - other_wavefront.complex_amplitude,
-                                     self.is_in_pupil_plane,
-                                     self.extent_pupil_plane_meters,
-                                     self.extent_focal_plane_dimensionless,
-                                     self.extent_focal_plane_meters,
-                                     self.number_of_pixels,
-                                     self.has_fiber_been_applied)
-
-    @property
-    def phase(self) -> np.ndarray:
-        """
-        Return the phase of the complex amplitude.
-
-                Returns:
-                        Array containing phase
-        """
-        return np.angle(self.complex_amplitude)
-
-    @property
-    def intensity(self) -> np.ndarray:
-        """
-        Return the intensity of the complex amplitude.
-
-                Returns:
-                        Array containing intensity
-        """
-        return abs(self.complex_amplitude) ** 2
-
     def apply(self, optical_element: BaseOpticalElement):
         """
         Apply an optical element.
@@ -139,9 +131,8 @@ class Wavefront(BaseWavefront):
 
     def __init__(self,
                  wavelength: float,
-                 zernike_modes: list,
                  beam_diameter: float,
-                 number_of_pixels: int):
+                 grid_size: int):
         """
         Constructor for wavefront object.
 
@@ -149,13 +140,13 @@ class Wavefront(BaseWavefront):
                         wavelength: Wavelength of the wavefront in meters
                         zernike_modes: List containing the zernike mode indices and their coefficients in meters
                         beam_diameter: Beam diameter in the aperture plane in meters
-                        number_of_pixels: Side length of the output array in pixels (1 pixel =^ 300 um)
+                        grid_size: Side length of the output array in pixels (1 pixel =^ 300 um)
         """
         BaseWavefront.__init__(self)
         self.wavelength = wavelength
         self.zernike_modes = zernike_modes
         self.beam_diameter = beam_diameter
-        self.number_of_pixels = number_of_pixels
+        self.grid_size = grid_size
 
         self.extent_pupil_plane_meters = self.beam_diameter
         self.extent_focal_plane_dimensionless = self.get_extent_focal_plane_dimensionless()
@@ -203,23 +194,23 @@ class Wavefront(BaseWavefront):
         self._beam_diameter = value
 
     @property
-    def number_of_pixels(self) -> int:
+    def grid_size(self) -> int:
         """
-        Return the number of pixels.
+        Return the grid size.
 
                 Returns:
-                        Integer corresponding to the number of pixels
+                        Integer corresponding to the grid size
         """
-        return self._number_of_pixels
+        return self._grid_size
 
-    @number_of_pixels.setter
-    def number_of_pixels(self, value):
+    @grid_size.setter
+    def grid_size(self, value):
         """
-        Setter method for the number of pixels.
+        Setter method for the grid size.
         """
         if not (type(value) == int and value > 0 and value % 2 == 1):
-            raise ValueError(f'Number of pixels must be an odd, positive integer.')
-        self._number_of_pixels = value
+            raise ValueError(f'Grid size must be an odd, positive integer.')
+        self._grid_size = value
 
     def get_aperture_function(self) -> np.ndarray:
         """
@@ -229,7 +220,7 @@ class Wavefront(BaseWavefront):
                         Array containing circular aperture.
         """
         extent = self.extent_pupil_plane_meters / 2
-        extent_linear_space = np.linspace(-extent, extent, self.number_of_pixels)
+        extent_linear_space = np.linspace(-extent, extent, self.grid_size)
         self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
         self._aperture_radius = self.beam_diameter / 2
 
@@ -289,7 +280,7 @@ class CombinedWavefront(BaseWavefront):
                  extent_pupil_plane_meters: float,
                  extent_focal_plane_dimensionless: float,
                  extent_focal_plane_meters: float,
-                 number_of_pixels: int,
+                 grid_size: int,
                  has_fiber_been_applied: bool):
         """
         Constructor for combined wavefront object.
@@ -302,7 +293,7 @@ class CombinedWavefront(BaseWavefront):
                         extent_pupil_plane_meters: Full array width in pupil plane in meters
                         extent_focal_plane_dimensionless: Full array width in focal plane dimensionless
                         extent_focal_plane_meters: Full array width in focal plane in meters
-                        number_of_pixels: Number of pixels in array
+                        grid_size: Grid size of array
                         has_fiber_been_applied: Boolean specifying whether a fiber has been applied
         """
         self.wavelength = wavelength
@@ -312,5 +303,5 @@ class CombinedWavefront(BaseWavefront):
         self.extent_pupil_plane_meters = extent_pupil_plane_meters
         self.extent_focal_plane_dimensionless = extent_focal_plane_dimensionless
         self.extent_focal_plane_meters = extent_focal_plane_meters
-        self.number_of_pixels = number_of_pixels
+        self.grid_size = grid_size
         self.has_fiber_been_applied = has_fiber_been_applied
