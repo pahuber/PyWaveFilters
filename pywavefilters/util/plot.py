@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+from matplotlib.colors import LogNorm
 
 from pywavefilters.wavefronts.wavefront import BaseWavefront, Wavefront
 
@@ -15,7 +16,8 @@ def plot_intensity_pupil_plane(wavefront: BaseWavefront, title=None):
         raise Exception('Wavefront must be in pupil plane')
 
     half_extent = wavefront.extent_pupil_plane_meters.value / 2
-    plt.imshow(wavefront.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent])
+    plt.imshow(wavefront.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent], norm=LogNorm(),
+               cmap='gist_heat')
 
     if title is None:
         plt.title('Intensity Pupil Plane')
@@ -48,7 +50,8 @@ def plot_intensity_focal_plane(wavefront: BaseWavefront, title=None, dimensionle
     else:
         half_extent = wavefront.extent_focal_plane_meters.value / 2
 
-    plt.imshow(wavefront.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent])
+    plt.imshow(wavefront.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent], norm=LogNorm(),
+               cmap='gist_heat')
 
     if title is None:
         plt.title('Intensity Focal Plane')
@@ -76,7 +79,7 @@ def plot_initial_wavefront_error(wavefront: Wavefront, title=None):
                     wavefront: Wavefront to be plotted
                     title: Optional title of the plot
     """
-    plt.imshow(wavefront.initial_wavefront_error.value)
+    plt.imshow(wavefront.initial_wavefront_error.value, cmap='bwr')
     plt.colorbar()
 
     if title is None:
