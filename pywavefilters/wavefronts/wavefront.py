@@ -1,9 +1,11 @@
+from typing import Tuple
+
 import astropy
 import numpy as np
 from astropy import units as u
 
 from pywavefilters.optical_elements.optical_element import BaseOpticalElement
-from pywavefilters.wavefronts.zernike import get_zernike_polynomial
+from pywavefilters.util.math import normalize_intensity
 
 
 class BaseWavefront:
@@ -19,8 +21,6 @@ class BaseWavefront:
         """
         self.wavelength = 0 * u.meter
         self.beam_diameter = 0 * u.meter
-        self.amplitude = None
-        self.phase = None
         self.complex_amplitude = None
         self.is_in_pupil_plane = None
         self.extent_pupil_plane_meters = None
@@ -28,6 +28,9 @@ class BaseWavefront:
         self.extent_focal_plane_meters = None  # Is reset to None after leaving the focal plane
         self.grid_size = 1
         self.has_fiber_been_applied = None
+
+        self._x_map = None
+        self._y_map = None
 
     def __add__(self, other_wavefront):
         """
@@ -53,7 +56,9 @@ class BaseWavefront:
                                      self.extent_focal_plane_dimensionless,
                                      self.extent_focal_plane_meters,
                                      self.grid_size,
-                                     self.has_fiber_been_applied)
+                                     self.has_fiber_been_applied,
+                                     self._x_map,
+                                     self._y_map)
 
     def __sub__(self, other_wavefront):
         """
@@ -79,7 +84,39 @@ class BaseWavefront:
                                      self.extent_focal_plane_dimensionless,
                                      self.extent_focal_plane_meters,
                                      self.grid_size,
-                                     self.has_fiber_been_applied)
+                                     self.has_fiber_been_applied,
+                                     self._x_map,
+                                     self._y_map)
+
+    @property
+    def aperture_radius(self) -> float:
+        """
+        Return the aperture radius.
+
+                Returns:
+                        Aperture radius
+        """
+        return self.beam_diameter / 2
+
+    @property
+    def amplitude(self) -> np.ndarray:
+        """
+        Return the amplitude of the complex amplitude.
+
+                Returns:
+                        Array containing amplitude
+        """
+        return abs(self.complex_amplitude)
+
+    @property
+    def phase(self) -> np.ndarray:
+        """
+        Return the phase of the complex amplitude.
+
+                Returns:
+                        Array containing phase
+        """
+        return np.angle(self.complex_amplitude)
 
     @property
     def intensity(self) -> np.ndarray:
@@ -117,6 +154,9 @@ class BaseWavefront:
         """
         return BaseWavefront.get_extent_focal_plane_dimensionless() / beam_diameter * lens.focal_length * wavelength
 
+    def add_phase(self, phase: np.ndarray) -> np.ndarray:
+        self.complex_amplitude *= np.exp(1j * phase)
+
     def apply(self, optical_element: BaseOpticalElement):
         """
         Apply an optical element.
@@ -144,16 +184,16 @@ class Wavefront(BaseWavefront):
         """
         BaseWavefront.__init__(self)
         self.wavelength = wavelength
-        self.zernike_modes = zernike_modes
         self.beam_diameter = beam_diameter
         self.grid_size = grid_size
 
         self.extent_pupil_plane_meters = self.beam_diameter
         self.extent_focal_plane_dimensionless = self.get_extent_focal_plane_dimensionless()
-        self.aperture_function = self.get_aperture_function()
-        self.initial_wavefront_error = self.get_wavefront_error()
-        self.complex_amplitude = self.get_initial_complex_amplitude()
         self.is_in_pupil_plane = True
+
+        self._x_map, self._y_map = self.initialize_grid(self.extent_pupil_plane_meters / 2)
+        self.complex_amplitude = normalize_intensity(
+            self.get_gaussian_beam_profile() * self.get_aperture_function() * u.watt ** 0.5 / u.meter)
 
     @property
     def wavelength(self) -> float:
@@ -212,6 +252,17 @@ class Wavefront(BaseWavefront):
             raise ValueError(f'Grid size must be an odd, positive integer.')
         self._grid_size = value
 
+    def initialize_grid(self, extent: float) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Return a tuple of arrays containing the coordinate maps.
+
+                Returns:
+                        Tuple of arrays containing the coordinate maps
+        """
+        extent_linear_space = np.linspace(-extent, extent, self.grid_size)
+
+        return np.meshgrid(extent_linear_space, extent_linear_space)
+
     def get_aperture_function(self) -> np.ndarray:
         """
         Return an array containing a circular aperture.
@@ -219,52 +270,18 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing circular aperture.
         """
-        extent = self.extent_pupil_plane_meters / 2
-        extent_linear_space = np.linspace(-extent, extent, self.grid_size)
-        self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
-        self._aperture_radius = self.beam_diameter / 2
-
         return 1 * u.watt ** 0.5 / u.meter * (
-                self._x_map ** 2 + self._y_map ** 2 < self._aperture_radius ** 2).astype(
+                self._x_map ** 2 + self._y_map ** 2 < self.aperture_radius ** 2).astype(
             complex)
 
-    def get_wavefront_error(self) -> np.ndarray:
+    def get_gaussian_beam_profile(self) -> np.ndarray:
         """
-        Return a wavefront error composed of a sum of several Zernike polynomial terms Z_j.
+        Return an array containing a Gaussian beam profile.
 
                 Returns:
-                        Array containing wavefront error
+                        Array containing the Gaussian beam profile.
         """
-        if self.zernike_modes is None:
-            return 0 * u.meter
-
-        radial_map = np.sqrt(self._x_map ** 2 + self._y_map ** 2)
-        angular_map = np.arctan2(self._y_map, self._x_map)
-
-        wavefront_error = 0
-        for element in self.zernike_modes:
-            zernike_mode_index = element[0]
-            mode_coefficient = element[1]
-            wavefront_error += mode_coefficient * get_zernike_polynomial(zernike_mode_index, radial_map, angular_map,
-                                                                         self._aperture_radius)
-
-        return wavefront_error
-
-    def get_initial_complex_amplitude(self) -> np.ndarray:
-        """
-        Return an array containing the complex amplitude of the wavefront.
-
-                Returns:
-                        Array containing the complex amplitude.
-        """
-        gaussian_intensity_profile = np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self._aperture_radius) ** 2)
-
-        complex_amplitude = gaussian_intensity_profile * self.aperture_function * np.exp(
-            2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
-
-        normalization_constant = 1 / np.sqrt(np.sum(abs(complex_amplitude) ** 2))
-
-        return normalization_constant * complex_amplitude * u.watt ** 0.5 / u.meter
+        return np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self.aperture_radius) ** 2)
 
 
 class CombinedWavefront(BaseWavefront):
@@ -281,7 +298,9 @@ class CombinedWavefront(BaseWavefront):
                  extent_focal_plane_dimensionless: float,
                  extent_focal_plane_meters: float,
                  grid_size: int,
-                 has_fiber_been_applied: bool):
+                 has_fiber_been_applied: bool,
+                 _x_map: np.ndarray,
+                 _y_map: np.ndarray):
         """
         Constructor for combined wavefront object.
 
@@ -295,6 +314,8 @@ class CombinedWavefront(BaseWavefront):
                         extent_focal_plane_meters: Full array width in focal plane in meters
                         grid_size: Grid size of array
                         has_fiber_been_applied: Boolean specifying whether a fiber has been applied
+                        _x_map: X coordinate map of grid
+                        _y_map: Y coordinate map of grid
         """
         self.wavelength = wavelength
         self.beam_diameter = beam_diameter
@@ -305,3 +326,5 @@ class CombinedWavefront(BaseWavefront):
         self.extent_focal_plane_meters = extent_focal_plane_meters
         self.grid_size = grid_size
         self.has_fiber_been_applied = has_fiber_been_applied
+        self._x_map = _x_map
+        self._y_map = _y_map

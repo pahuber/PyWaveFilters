@@ -1,8 +1,10 @@
 from math import factorial
 
 import numpy as np
+from astropy import units as u
 
 from pywavefilters.util.math import get_kronecker_delta
+from pywavefilters.wavefronts.wavefront import BaseWavefront
 
 
 def get_noll_index(index_n: int, index_m: int) -> int:
@@ -117,3 +119,27 @@ def get_zernike_polynomial(zernike_mode_index: int,
     else:
         return norm * get_radial_zernike_polynomial(index_n, index_m, radial_map, maximum_radius) * \
                np.sin(abs(index_m) * angular_map)
+
+
+def get_zernike_error(wavefront: BaseWavefront, zernike_modes: list) -> np.ndarray:
+    """
+    Return an array composed of a sum of several Zernike polynomial terms Z_j.
+
+            Returns:
+                    Array containing sum of Zernike polynomials
+    """
+    if zernike_modes is None:
+        return 0 * u.meter
+
+    radial_map = np.sqrt(wavefront._x_map ** 2 + wavefront._y_map ** 2)
+    angular_map = np.arctan2(wavefront._y_map, wavefront._x_map)
+
+    wavefront_error = 0
+    for element in zernike_modes:
+        zernike_mode_index = element[0]
+        mode_coefficient = element[1]
+        wavefront_error += mode_coefficient * get_zernike_polynomial(zernike_mode_index, radial_map,
+                                                                     angular_map,
+                                                                     wavefront.aperture_radius)
+
+    return wavefront_error
