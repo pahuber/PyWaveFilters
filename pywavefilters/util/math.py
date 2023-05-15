@@ -20,6 +20,18 @@ def get_kronecker_delta(index_a: int, index_b: int) -> int:
         return 0
 
 
+def get_x_y_grid(grid_size: int, extent: float) -> np.ndarray:
+    """
+    Return a tuple of arrays containing the coordinate maps.
+
+            Returns:
+                    Tuple of arrays containing the coordinate maps
+    """
+    extent_linear_space = np.linspace(-extent, extent, grid_size)
+
+    return np.meshgrid(extent_linear_space, extent_linear_space)
+
+
 def normalize_intensity(array_to_normalize: np.ndarray) -> np.ndarray:
     """
     Method to normalize the intensity of a wavefront.

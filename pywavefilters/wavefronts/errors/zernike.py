@@ -3,7 +3,7 @@ from math import factorial
 import numpy as np
 from astropy import units as u
 
-from pywavefilters.util.math import get_kronecker_delta
+from pywavefilters.util.math import get_kronecker_delta, get_x_y_grid
 from pywavefilters.wavefronts.wavefront import BaseWavefront
 
 
@@ -121,7 +121,7 @@ def get_zernike_polynomial(zernike_mode_index: int,
                np.sin(abs(index_m) * angular_map)
 
 
-def get_zernike_error(wavefront: BaseWavefront, zernike_modes: list) -> np.ndarray:
+def get_zernike_error(beam_diameter: float, zernike_modes: list, grid_size: int) -> np.ndarray:
     """
     Return an array composed of a sum of several Zernike polynomial terms Z_j.
 
@@ -131,8 +131,11 @@ def get_zernike_error(wavefront: BaseWavefront, zernike_modes: list) -> np.ndarr
     if zernike_modes is None:
         return 0 * u.meter
 
-    radial_map = np.sqrt(wavefront._x_map ** 2 + wavefront._y_map ** 2)
-    angular_map = np.arctan2(wavefront._y_map, wavefront._x_map)
+    extent = BaseWavefront.get_extent_pupil_plane_meters(beam_diameter) / 2
+    x_map, y_map = get_x_y_grid(grid_size, extent)
+
+    radial_map = np.sqrt(x_map ** 2 + y_map ** 2)
+    angular_map = np.arctan2(y_map, x_map)
 
     wavefront_error = 0
     for element in zernike_modes:
@@ -140,6 +143,6 @@ def get_zernike_error(wavefront: BaseWavefront, zernike_modes: list) -> np.ndarr
         mode_coefficient = element[1]
         wavefront_error += mode_coefficient * get_zernike_polynomial(zernike_mode_index, radial_map,
                                                                      angular_map,
-                                                                     wavefront.aperture_radius)
+                                                                     beam_diameter / 2)
 
     return wavefront_error

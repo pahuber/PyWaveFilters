@@ -25,11 +25,11 @@ wavefront_2 = Wavefront(wavelength,
                         grid_size)
 
 # Add phase errors
-phase_error_zernike_1 = get_zernike_error(wavefront_1, zernike_modes_1)
+phase_error_zernike_1 = get_zernike_error(beam_diameter, zernike_modes_1, grid_size)
 wavefront_1.add_phase(2 * np.pi * phase_error_zernike_1 / wavelength)
 wavefront_1.complex_amplitude = normalize_intensity(wavefront_1.complex_amplitude)
 
-phase_error_zernike_2 = get_zernike_error(wavefront_2, zernike_modes_2)
+phase_error_zernike_2 = get_zernike_error(beam_diameter, zernike_modes_2, grid_size)
 wavefront_2.add_phase(2 * np.pi * phase_error_zernike_2 / wavelength)
 wavefront_2.complex_amplitude = normalize_intensity(wavefront_2.complex_amplitude)
 

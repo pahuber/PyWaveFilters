@@ -1,11 +1,9 @@
-from typing import Tuple
-
 import astropy
 import numpy as np
 from astropy import units as u
 
 from pywavefilters.optical_elements.optical_element import BaseOpticalElement
-from pywavefilters.util.math import normalize_intensity
+from pywavefilters.util.math import normalize_intensity, get_x_y_grid
 
 
 class BaseWavefront:
@@ -129,6 +127,16 @@ class BaseWavefront:
         return abs(self.complex_amplitude) ** 2
 
     @staticmethod
+    def get_extent_pupil_plane_meters(beam_diameter: float):
+        """
+        Return a value corresponding to the full extent of the array in the pupil plane in units of meters.
+
+                Returns:
+                        Value corresponding to the full extent in meters
+        """
+        return beam_diameter
+
+    @staticmethod
     def get_extent_focal_plane_dimensionless():
         """
         Return a value corresponding to the full extent of the array in the focal plane in units of wavelength over
@@ -193,11 +201,11 @@ class Wavefront(BaseWavefront):
         self.beam_diameter = beam_diameter
         self.grid_size = grid_size
 
-        self.extent_pupil_plane_meters = self.beam_diameter
+        self.extent_pupil_plane_meters = self.get_extent_pupil_plane_meters(self.beam_diameter)
         self.extent_focal_plane_dimensionless = self.get_extent_focal_plane_dimensionless()
         self.is_in_pupil_plane = True
 
-        self._x_map, self._y_map = self.initialize_grid(self.extent_pupil_plane_meters / 2)
+        self._x_map, self._y_map = get_x_y_grid(self.grid_size, self.extent_pupil_plane_meters / 2)
         self.complex_amplitude = normalize_intensity(
             self.get_gaussian_beam_profile() * self.get_aperture_function() * u.watt ** 0.5 / u.meter)
 
@@ -258,17 +266,6 @@ class Wavefront(BaseWavefront):
             raise ValueError(f'Grid size must be an odd, positive integer.')
         self._grid_size = value
 
-    def initialize_grid(self, extent: float) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Return a tuple of arrays containing the coordinate maps.
-
-                Returns:
-                        Tuple of arrays containing the coordinate maps
-        """
-        extent_linear_space = np.linspace(-extent, extent, self.grid_size)
-
-        return np.meshgrid(extent_linear_space, extent_linear_space)
-
     def get_aperture_function(self) -> np.ndarray:
         """
         Return an array containing a circular aperture.
@@ -276,9 +273,7 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing circular aperture.
         """
-        return 1 * (
-                self._x_map ** 2 + self._y_map ** 2 < self.aperture_radius ** 2).astype(
-            complex)
+        return (self._x_map ** 2 + self._y_map ** 2 < self.aperture_radius ** 2).astype(complex)
 
     def get_gaussian_beam_profile(self) -> np.ndarray:
         """
