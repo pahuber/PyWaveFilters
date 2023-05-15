@@ -154,7 +154,13 @@ class BaseWavefront:
         """
         return BaseWavefront.get_extent_focal_plane_dimensionless() / beam_diameter * lens.focal_length * wavelength
 
-    def add_phase(self, phase: np.ndarray) -> np.ndarray:
+    def add_phase(self, phase: np.ndarray):
+        """
+        Add a phase to the complex amplitude of the wavefront.
+
+                Parameters:
+                        phase: Array containing the phase profile
+        """
         self.complex_amplitude *= np.exp(1j * phase)
 
     def apply(self, optical_element: BaseOpticalElement):
@@ -194,6 +200,7 @@ class Wavefront(BaseWavefront):
         self._x_map, self._y_map = self.initialize_grid(self.extent_pupil_plane_meters / 2)
         self.complex_amplitude = normalize_intensity(
             self.get_gaussian_beam_profile() * self.get_aperture_function() * u.watt ** 0.5 / u.meter)
+        print("bla")
 
     @property
     def wavelength(self) -> float:
@@ -270,7 +277,7 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing circular aperture.
         """
-        return 1 * u.watt ** 0.5 / u.meter * (
+        return 1 * (
                 self._x_map ** 2 + self._y_map ** 2 < self.aperture_radius ** 2).astype(
             complex)
 
