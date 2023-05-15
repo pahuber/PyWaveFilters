@@ -4,6 +4,7 @@ from astropy import units as u
 from pywavefilters.optical_elements.filter.fiber import Fiber
 from pywavefilters.optical_elements.lens import Lens
 from pywavefilters.optical_elements.phase_shifter import PhaseShifter
+from pywavefilters.wavefronts.errors.zernike import get_zernike_error
 from pywavefilters.wavefronts.wavefront import Wavefront
 
 # Define wavefront
@@ -11,17 +12,21 @@ wavelength = 15e-6 * u.meter
 zernike_modes_1 = [(5, wavelength / 100)]
 zernike_modes_2 = [(6, wavelength / 200)]
 beam_diameter = 0.003 * u.meter
-number_of_pixels = 401
+number_of_pixels = 201
 
 wavefront_1 = Wavefront(wavelength,
-                        zernike_modes_1,
                         beam_diameter,
                         number_of_pixels)
 
 wavefront_2 = Wavefront(wavelength,
-                        zernike_modes_2,
                         beam_diameter,
                         number_of_pixels)
+
+phase_error_zernike_1 = get_zernike_error(wavefront_1, zernike_modes_1)
+wavefront_1.add_phase(2 * np.pi * phase_error_zernike_1 / wavelength)
+
+phase_error_zernike_2 = get_zernike_error(wavefront_2, zernike_modes_2)
+wavefront_2.add_phase(2 * np.pi * phase_error_zernike_2 / wavelength)
 
 # Define optical elements
 focal_length = 0.074 * u.meter
