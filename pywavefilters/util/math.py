@@ -20,6 +20,19 @@ def get_kronecker_delta(index_a: int, index_b: int) -> int:
         return 0
 
 
+def normalize_intensity(array_to_normalize: np.ndarray) -> np.ndarray:
+    """
+    Method to normalize the intensity of a wavefront.
+
+            Parameters:
+                    array_to_normalize: Array corresponding to the complex amplitude
+
+            Returns:
+                    Array corresponding to the intensity normalized complex amplitude
+    """
+    return 1 / np.sqrt(np.sum(abs(array_to_normalize.value) ** 2)) * array_to_normalize
+
+
 def get_2d_chirp_z_transform(complex_amplitude: np.ndarray, grid_size: int,
                              maximum_frequency: int) -> np.ndarray:
     """
