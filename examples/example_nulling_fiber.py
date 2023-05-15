@@ -8,21 +8,23 @@ from pywavefilters.util.math import normalize_intensity
 from pywavefilters.wavefronts.errors.zernike import get_zernike_error
 from pywavefilters.wavefronts.wavefront import Wavefront
 
-# Define wavefront
+# Parameters
+grid_size = 401
 wavelength = 15e-6 * u.meter
+beam_diameter = 0.003 * u.meter
 zernike_modes_1 = [(5, wavelength / 100)]
 zernike_modes_2 = [(6, wavelength / 200)]
-beam_diameter = 0.003 * u.meter
-number_of_pixels = 401
 
+# Define wavefront
 wavefront_1 = Wavefront(wavelength,
                         beam_diameter,
-                        number_of_pixels)
+                        grid_size)
 
 wavefront_2 = Wavefront(wavelength,
                         beam_diameter,
-                        number_of_pixels)
+                        grid_size)
 
+# Add phase errors
 phase_error_zernike_1 = get_zernike_error(wavefront_1, zernike_modes_1)
 wavefront_1.add_phase(2 * np.pi * phase_error_zernike_1 / wavelength)
 wavefront_1.complex_amplitude = normalize_intensity(wavefront_1.complex_amplitude)
@@ -40,7 +42,7 @@ fiber = Fiber(wavelength,
               2 * 170e-6 * u.meter,
               2.7,
               2.6987,
-              number_of_pixels,
+              grid_size,
               lens)
 
 # Transform to focal plane and apply fibers
@@ -66,7 +68,5 @@ null_depth = np.sum(wavefront_dest.intensity) / np.sum(wavefront_const.intensity
 intensity_filtered = wavefront_const.intensity
 throughput = np.sum(intensity_filtered) / np.sum(intensity_unfiltered)
 
-print(np.sum(intensity_unfiltered))
-print(np.sum(intensity_filtered))
 print('Null Depth: ', null_depth)
 print('Throughput: ', throughput)

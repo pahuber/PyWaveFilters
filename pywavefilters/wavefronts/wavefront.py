@@ -200,7 +200,6 @@ class Wavefront(BaseWavefront):
         self._x_map, self._y_map = self.initialize_grid(self.extent_pupil_plane_meters / 2)
         self.complex_amplitude = normalize_intensity(
             self.get_gaussian_beam_profile() * self.get_aperture_function() * u.watt ** 0.5 / u.meter)
-        print("bla")
 
     @property
     def wavelength(self) -> float:
