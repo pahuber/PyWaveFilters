@@ -2,7 +2,7 @@ import numpy as np
 from astropy import units as u
 
 from pywavefilters.optical_elements.filter.pinhole import Pinhole
-from pywavefilters.optical_elements.lens import Lens
+from pywavefilters.optical_elements.general.lens import Lens
 from pywavefilters.wavefronts.wavefront import Wavefront
 
 # Define wavefront

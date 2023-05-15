@@ -2,7 +2,7 @@ import astropy
 import numpy as np
 from astropy import units as u
 
-from pywavefilters.optical_elements.lens import Lens
+from pywavefilters.optical_elements.general.lens import Lens
 from pywavefilters.optical_elements.optical_element import BaseOpticalElement
 from pywavefilters.wavefronts.wavefront import BaseWavefront
 

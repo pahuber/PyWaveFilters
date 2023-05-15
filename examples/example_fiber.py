@@ -1,7 +1,7 @@
 from astropy import units as u
 
 from pywavefilters.optical_elements.filter.fiber import Fiber
-from pywavefilters.optical_elements.lens import Lens
+from pywavefilters.optical_elements.general.lens import Lens
 from pywavefilters.util.plot import plot_intensity_pupil_plane, plot_intensity_focal_plane, \
     plot_initial_wavefront_error
 from pywavefilters.wavefronts.wavefront import Wavefront
