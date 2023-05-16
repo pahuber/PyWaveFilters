@@ -11,7 +11,7 @@ from pywavefilters.wavefronts.wavefront import Wavefront
 grid_size = 401
 wavelength = 15e-6 * u.meter
 beam_diameter = 0.003 * u.meter
-zernike_modes_1 = [(5, 0 * wavelength / 100)]
+zernike_modes_1 = [(5, wavelength / 100)]
 zernike_modes_2 = [(6, wavelength / 100)]
 
 # Define wavefront
@@ -22,13 +22,13 @@ wavefront_2 = Wavefront(wavelength, beam_diameter, grid_size)
 phase_error_zernike_1 = get_zernike_error(wavelength, beam_diameter, zernike_modes_1, grid_size)
 wavefront_1.add_phase(phase_error_zernike_1)
 
-phase_error_psd_1 = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 10, grid_size)
+phase_error_psd_1 = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 100, grid_size)
 wavefront_1.add_phase(phase_error_psd_1)
 
 phase_error_zernike_2 = get_zernike_error(wavelength, beam_diameter, zernike_modes_2, grid_size)
 wavefront_2.add_phase(phase_error_zernike_2)
 
-phase_error_psd_2 = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 10, grid_size)
+phase_error_psd_2 = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 100, grid_size)
 wavefront_2.add_phase(phase_error_psd_2)
 
 # Define optical elements
