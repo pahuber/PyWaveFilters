@@ -23,14 +23,14 @@ phase_error_psd = get_power_spectral_density_error(wavelength, beam_diameter, wa
 wavefront.add_phase(phase_error_psd)
 
 # Define optical elements
-focal_length = 0.008 * u.meter
+focal_length = 0.074 * u.meter
 lens = Lens(focal_length)
 fiber = Fiber(wavelength,
               beam_diameter,
-              21e-6 * u.meter,
-              125e-6 * u.meter,
-              1.6,
-              1.59,
+              2 * 12e-6 * u.meter,
+              2 * 170e-6 * u.meter,
+              2.7,
+              2.6987,
               grid_size,
               lens)
 
