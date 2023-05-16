@@ -1,6 +1,8 @@
 import astropy
 import numpy as np
 from astropy import units as u
+from matplotlib import pyplot as plt
+from matplotlib.colors import LogNorm
 
 from pywavefilters.optical_elements.optical_element import BaseOpticalElement
 from pywavefilters.util.math import normalize_intensity, get_x_y_grid
@@ -176,6 +178,88 @@ class BaseWavefront:
         Apply an optical element.
         """
         optical_element.apply(self)
+
+    def plot_phase(self, title=None):
+        """
+        Plot the wavefront phase.
+
+                Parameters:
+                        title: Optional title of the plot
+        """
+        plt.imshow(self.phase.value, cmap='bwr')
+        plt.colorbar()
+
+        if title is None:
+            plt.title('Wavefront Phase')
+        else:
+            plt.title(title)
+
+        plt.show()
+
+    def plot_intensity_pupil_plane(self, title=None):
+        """
+        Plot the wavefront intensity in the pupil plane with correct axis scaling.
+
+                Parameters:
+                        title: Optional title of the plot
+        """
+        if not self.is_in_pupil_plane:
+            raise Exception('Wavefront must be in pupil plane')
+
+        half_extent = self.extent_pupil_plane_meters.value / 2
+        plt.imshow(self.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent],
+                   norm=LogNorm(),
+                   cmap='gist_heat')
+
+        if title is None:
+            plt.title('Intensity Pupil Plane')
+        else:
+            plt.title(title)
+
+        colorbar = plt.colorbar()
+        colorbar.set_label('Intensity (W/m$^2$)')
+
+        plt.xlabel('Width (m)')
+        plt.ylabel('Height (m)')
+
+        plt.show()
+
+    def plot_intensity_focal_plane(self, title=None, dimensionless=False):
+        """
+        Plot the wavefront intensity in the focal plane with correct axis scaling.
+
+                Parameters:
+                        title: Optional title of the plot
+                        dimensionless: Boolean to specify whether to plot in units of meters or in dimensionless units
+        """
+        if self.is_in_pupil_plane:
+            raise Exception('Wavefront must be in focal plane')
+
+        if dimensionless:
+            half_extent = self.extent_focal_plane_dimensionless / 2
+        else:
+            half_extent = self.extent_focal_plane_meters.value / 2
+
+        plt.imshow(self.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent],
+                   norm=LogNorm(),
+                   cmap='gist_heat')
+
+        if title is None:
+            plt.title('Intensity Focal Plane')
+        else:
+            plt.title(title)
+
+        if dimensionless:
+            plt.xlabel('Width ($\lambda/D$)')
+            plt.ylabel('Height ($\lambda/D$)')
+        else:
+            plt.xlabel('Width (m)')
+            plt.ylabel('Height (m)')
+
+        colorbar = plt.colorbar()
+        colorbar.set_label('Intensity (W/m$^2$)')  # TODO: check units
+
+        plt.show()
 
 
 class Wavefront(BaseWavefront):

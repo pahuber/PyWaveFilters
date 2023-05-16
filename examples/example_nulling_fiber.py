@@ -64,8 +64,8 @@ wavefront_const = wavefront_1 + wavefront_2
 wavefront_dest = wavefront_1 - wavefront_2
 
 # Calculate null depth and throughput
-null_depth = np.sum(wavefront_dest.intensity) / np.sum(wavefront_const.intensity)
 intensity_filtered = wavefront_const.intensity
+null_depth = np.sum(wavefront_dest.intensity) / np.sum(wavefront_const.intensity)
 throughput = np.sum(intensity_filtered) / np.sum(intensity_unfiltered)
 
 print('Null Depth: ', null_depth)

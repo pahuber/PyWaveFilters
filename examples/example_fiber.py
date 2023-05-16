@@ -1,45 +1,48 @@
+import numpy as np
 from astropy import units as u
 
 from pywavefilters.optical_elements.filter.fiber import Fiber
 from pywavefilters.optical_elements.general.lens import Lens
-from pywavefilters.util.plot import plot_intensity_pupil_plane, plot_intensity_focal_plane, \
-    plot_initial_wavefront_error
+from pywavefilters.util.math import normalize_intensity
+from pywavefilters.wavefronts.errors.zernike import get_zernike_error
 from pywavefilters.wavefronts.wavefront import Wavefront
 
-# Define wavefront
+# Parameters
+grid_size = 401
 wavelength = 1e-5 * u.meter
-zernike_modes = [(6, wavelength / 10)]
 beam_diameter = 0.003 * u.meter
-number_of_pixels = 201
+zernike_modes = [(6, wavelength / 10)]
 
+# Define wavefront
 wavefront = Wavefront(wavelength,
-                      zernike_modes,
                       beam_diameter,
-                      number_of_pixels)
+                      grid_size)
+
+# Add phase errors
+phase_error_zernike = get_zernike_error(beam_diameter, zernike_modes, grid_size)
+wavefront.add_phase(2 * np.pi * phase_error_zernike / wavelength)
+wavefront.complex_amplitude = normalize_intensity(wavefront.complex_amplitude)
 
 # Define optical elements
 focal_length = 0.008 * u.meter
-
 lens = Lens(focal_length)
-
 fiber = Fiber(wavelength,
               beam_diameter,
               21e-6 * u.meter,
               125e-6 * u.meter,
               1.6,
               1.59,
-              number_of_pixels,
+              grid_size,
               lens)
 
-# Apply optical elements to wavefront and plot at each stage
-plot_initial_wavefront_error(wavefront)
+# Plot wavefront in input plane
+wavefront.plot_phase()
+wavefront.plot_intensity_pupil_plane()
 
-plot_intensity_pupil_plane(wavefront)
-
+# Apply lens
 wavefront.apply(lens)
+wavefront.plot_intensity_focal_plane(dimensionless=True)
 
-plot_intensity_focal_plane(wavefront, dimensionless=True)
-
+# Apply fiber
 wavefront.apply(fiber)
-
-plot_intensity_focal_plane(wavefront, dimensionless=True, title='Intensity Focal Plane After Fiber')
+wavefront.plot_intensity_focal_plane(dimensionless=True, title='Intensity Focal Plane After Fiber')
