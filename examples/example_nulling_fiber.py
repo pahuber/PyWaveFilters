@@ -5,6 +5,7 @@ from pywavefilters.optical_elements.filter.fiber import Fiber
 from pywavefilters.optical_elements.general.lens import Lens
 from pywavefilters.optical_elements.general.phase_shifter import PhaseShifter
 from pywavefilters.util.math import normalize_intensity
+from pywavefilters.wavefronts.errors.power_spectral_density import get_power_spectral_density_error
 from pywavefilters.wavefronts.errors.zernike import get_zernike_error
 from pywavefilters.wavefronts.wavefront import Wavefront
 
@@ -27,6 +28,10 @@ wavefront_2 = Wavefront(wavelength,
 # Add phase errors
 phase_error_zernike_1 = get_zernike_error(beam_diameter, zernike_modes_1, grid_size)
 wavefront_1.add_phase(2 * np.pi * phase_error_zernike_1 / wavelength)
+wavefront_1.complex_amplitude = normalize_intensity(wavefront_1.complex_amplitude)
+
+phase_error_psd_1 = get_power_spectral_density_error(wavelength, beam_diameter, 3.29e-18, 212.26, 7.8, 100, grid_size)
+wavefront_1.add_phase(2 * np.pi * phase_error_psd_1 / wavelength.value)
 wavefront_1.complex_amplitude = normalize_intensity(wavefront_1.complex_amplitude)
 
 phase_error_zernike_2 = get_zernike_error(beam_diameter, zernike_modes_2, grid_size)
