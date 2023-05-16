@@ -1,4 +1,3 @@
-import numpy as np
 from astropy import units as u
 
 from pywavefilters.optical_elements.filter.fiber import Fiber
@@ -17,11 +16,11 @@ zernike_modes = [(6, wavelength / 10)]
 wavefront = Wavefront(wavelength, beam_diameter, grid_size)
 
 # Add phase errors
-phase_error_zernike = get_zernike_error(beam_diameter, zernike_modes, grid_size)
-wavefront.add_phase(2 * np.pi * phase_error_zernike / wavelength)
+phase_error_zernike = get_zernike_error(wavelength, beam_diameter, zernike_modes, grid_size)
+wavefront.add_phase(phase_error_zernike)
 
-phase_error_psd = get_power_spectral_density_error(wavelength, beam_diameter, 3.29e-18, 212.26, 7.8, grid_size)
-wavefront.add_phase(2 * np.pi * phase_error_psd / wavelength.value)
+phase_error_psd = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 10, grid_size)
+wavefront.add_phase(phase_error_psd)
 
 # Define optical elements
 focal_length = 0.008 * u.meter
