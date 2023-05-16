@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import LogNorm
 
 from pywavefilters.optical_elements.optical_element import BaseOpticalElement
-from pywavefilters.util.math import normalize_intensity, get_x_y_grid
+from pywavefilters.util.math import get_normalized_intensity, get_x_y_grid
 
 
 class BaseWavefront:
@@ -175,7 +175,7 @@ class BaseWavefront:
         """
         self.complex_amplitude *= np.exp(1j * phase)
         if normalize_intensity:
-            self.complex_amplitude = normalize_intensity(self.complex_amplitude)
+            self.complex_amplitude = get_normalized_intensity(self.complex_amplitude)
 
     def apply(self, optical_element: BaseOpticalElement):
         """
@@ -294,7 +294,7 @@ class Wavefront(BaseWavefront):
         self.is_in_pupil_plane = True
 
         self._x_map, self._y_map = get_x_y_grid(self.grid_size, self.extent_pupil_plane_meters / 2)
-        self.complex_amplitude = normalize_intensity(
+        self.complex_amplitude = get_normalized_intensity(
             self.get_gaussian_beam_profile() * self.get_aperture_function() * u.watt ** 0.5 / u.meter)
 
     @property
