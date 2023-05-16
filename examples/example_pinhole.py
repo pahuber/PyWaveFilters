@@ -3,7 +3,6 @@ from astropy import units as u
 
 from pywavefilters.optical_elements.filter.pinhole import Pinhole
 from pywavefilters.optical_elements.general.lens import Lens
-from pywavefilters.util.math import normalize_intensity
 from pywavefilters.wavefronts.errors.zernike import get_zernike_error
 from pywavefilters.wavefronts.wavefront import Wavefront
 
@@ -21,7 +20,6 @@ wavefront = Wavefront(wavelength,
 # Add phase errors
 phase_error_zernike = get_zernike_error(beam_diameter, zernike_modes, grid_size)
 wavefront.add_phase(2 * np.pi * phase_error_zernike / wavelength)
-wavefront.complex_amplitude = normalize_intensity(wavefront.complex_amplitude)
 
 # Define optical elements
 focal_length = 0.008 * u.meter

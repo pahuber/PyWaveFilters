@@ -164,14 +164,18 @@ class BaseWavefront:
         """
         return BaseWavefront.get_extent_focal_plane_dimensionless() / beam_diameter * lens.focal_length * wavelength
 
-    def add_phase(self, phase: np.ndarray):
+    def add_phase(self, phase: np.ndarray, normalize_intensity: bool = True):
         """
         Add a phase to the complex amplitude of the wavefront.
 
                 Parameters:
                         phase: Array containing the phase profile
+                        normalize_intensity: Boolean indicating whether the intensity of the complex amplitude should
+                                             be normalized to unity after applying the phase
         """
         self.complex_amplitude *= np.exp(1j * phase)
+        if normalize_intensity:
+            self.complex_amplitude = normalize_intensity(self.complex_amplitude)
 
     def apply(self, optical_element: BaseOpticalElement):
         """
