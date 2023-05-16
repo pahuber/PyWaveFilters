@@ -121,7 +121,7 @@ def get_zernike_polynomial(zernike_mode_index: int,
                np.sin(abs(index_m) * angular_map)
 
 
-def get_zernike_error(beam_diameter: float, zernike_modes: list, grid_size: int) -> np.ndarray:
+def get_zernike_error(wavelength: float, beam_diameter: float, zernike_modes: list, grid_size: int) -> np.ndarray:
     """
     Return an array composed of a sum of several Zernike polynomial terms Z_j.
 
@@ -145,4 +145,4 @@ def get_zernike_error(beam_diameter: float, zernike_modes: list, grid_size: int)
                                                                      angular_map,
                                                                      beam_diameter / 2)
 
-    return wavefront_error
+    return 2 * np.pi * wavefront_error / wavelength
