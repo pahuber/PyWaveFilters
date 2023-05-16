@@ -3,6 +3,7 @@ from astropy import units as u
 
 from pywavefilters.optical_elements.filter.pinhole import Pinhole
 from pywavefilters.optical_elements.general.lens import Lens
+from pywavefilters.wavefronts.errors.power_spectral_density import get_power_spectral_density_error
 from pywavefilters.wavefronts.errors.zernike import get_zernike_error
 from pywavefilters.wavefronts.wavefront import Wavefront
 
@@ -18,11 +19,17 @@ wavefront_1 = Wavefront(wavelength, beam_diameter, grid_size)
 wavefront_2 = Wavefront(wavelength, beam_diameter, grid_size)
 
 # Add phase errors
-phase_error_zernike_1 = get_zernike_error(beam_diameter, zernike_modes_1, grid_size)
-wavefront_1.add_phase(2 * np.pi * phase_error_zernike_1 / wavelength)
+phase_error_zernike_1 = get_zernike_error(wavelength, beam_diameter, zernike_modes_1, grid_size)
+wavefront_1.add_phase(phase_error_zernike_1)
 
-phase_error_zernike_2 = get_zernike_error(beam_diameter, zernike_modes_2, grid_size)
-wavefront_2.add_phase(2 * np.pi * phase_error_zernike_2 / wavelength)
+phase_error_psd_1 = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 10, grid_size)
+wavefront_1.add_phase(phase_error_psd_1)
+
+phase_error_zernike_2 = get_zernike_error(wavelength, beam_diameter, zernike_modes_2, grid_size)
+wavefront_2.add_phase(phase_error_zernike_2)
+
+phase_error_psd_2 = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 10, grid_size)
+wavefront_2.add_phase(phase_error_psd_2)
 
 # Define optical elements
 focal_length = 0.003 * u.meter

@@ -128,6 +128,8 @@ def get_zernike_error(wavelength: float, beam_diameter: float, zernike_modes: li
             Returns:
                     Array containing sum of Zernike polynomials
     """
+
+    # TODO: add RMS implementation
     if zernike_modes is None:
         return 0 * u.meter
 
