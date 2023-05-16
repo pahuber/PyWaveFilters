@@ -108,6 +108,8 @@ def get_power_spectral_density_error(wavelength: float,
     # error_map *= (low_spatial_frequency_power / rms_error_map)
     error_map = prop_shift_center(error_map)
 
+    # TODO: check implementation with RMS and units
+
     return error_map
 
 
