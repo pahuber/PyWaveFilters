@@ -14,13 +14,8 @@ zernike_modes_1 = [(5, 0 * wavelength / 100)]
 zernike_modes_2 = [(6, wavelength / 100)]
 
 # Define wavefront
-wavefront_1 = Wavefront(wavelength,
-                        beam_diameter,
-                        grid_size)
-
-wavefront_2 = Wavefront(wavelength,
-                        beam_diameter,
-                        grid_size)
+wavefront_1 = Wavefront(wavelength, beam_diameter, grid_size)
+wavefront_2 = Wavefront(wavelength, beam_diameter, grid_size)
 
 # Add phase errors
 phase_error_zernike_1 = get_zernike_error(beam_diameter, zernike_modes_1, grid_size)
