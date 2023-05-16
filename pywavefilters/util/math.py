@@ -32,7 +32,20 @@ def get_x_y_grid(grid_size: int, extent: float) -> np.ndarray:
     return np.meshgrid(extent_linear_space, extent_linear_space)
 
 
-def normalize_intensity(array_to_normalize: np.ndarray) -> np.ndarray:
+def get_root_mean_square(array: np.ndarray) -> float:
+    """
+    Method to calculate the root mean square (RMS) of an array.
+
+            Parameters:
+                    array: Aray to calculate RMS for
+
+            Returns:
+                    RMS of the array
+    """
+    return np.sqrt(np.mean(np.square(array)))
+
+
+def get_normalized_intensity(array_to_normalize: np.ndarray) -> np.ndarray:
     """
     Method to normalize the intensity of a wavefront.
 
