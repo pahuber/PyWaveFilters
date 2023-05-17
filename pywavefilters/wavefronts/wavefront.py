@@ -1,9 +1,11 @@
 import astropy
 import numpy as np
 from astropy import units as u
+from matplotlib import pyplot as plt
+from matplotlib.colors import LogNorm
 
 from pywavefilters.optical_elements.optical_element import BaseOpticalElement
-from pywavefilters.wavefronts.zernike import get_zernike_polynomial
+from pywavefilters.util.math import get_normalized_intensity, get_x_y_grid
 
 
 class BaseWavefront:
@@ -11,7 +13,130 @@ class BaseWavefront:
     Base class to represent wavefronts.
     """
 
-    _chirp_z_maximum_frequency = 20
+    _chirp_z_maximum_frequency = 100
+
+    def __init__(self):
+        """
+        Constructor for base wavefront object.
+        """
+        self.wavelength = 0 * u.meter
+        self.beam_diameter = 0 * u.meter
+        self.complex_amplitude = None
+        self.is_in_pupil_plane = None
+        self.extent_pupil_plane_meters = None
+        self.extent_focal_plane_dimensionless = None
+        self.extent_focal_plane_meters = None  # Is reset to None after leaving the focal plane
+        self.grid_size = 1
+        self.has_fiber_been_applied = None
+
+        self._x_map = None
+        self._y_map = None
+
+    def __add__(self, other_wavefront):
+        """
+        Method to add two base wavefront together.
+
+                Parameters:
+                        other_wavefront: Base wavefront object to be added
+                Returns:
+                        Combined wavefront object
+        """
+        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
+            raise Exception('Wavefronts must both be in pupil or in focal plane')
+        elif self.beam_diameter != other_wavefront.beam_diameter:
+            raise Exception('Wavefronts must have same beam diameter')
+        elif self.wavelength != other_wavefront.wavelength:
+            raise Exception('Wavefronts must have same wavelengths')
+        else:
+            return CombinedWavefront(self.wavelength,
+                                     self.beam_diameter,
+                                     self.complex_amplitude + other_wavefront.complex_amplitude,
+                                     self.is_in_pupil_plane,
+                                     self.extent_pupil_plane_meters,
+                                     self.extent_focal_plane_dimensionless,
+                                     self.extent_focal_plane_meters,
+                                     self.grid_size,
+                                     self.has_fiber_been_applied,
+                                     self._x_map,
+                                     self._y_map)
+
+    def __sub__(self, other_wavefront):
+        """
+        Method to subtract one base wavefront from another.
+
+                Parameters:
+                        other_wavefront: Base wavefront object to be subtracted
+                Returns:
+                        Combined, i.e. subtracted, wavefront object
+        """
+        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
+            raise Exception('Wavefronts must both be in pupil or in focal plane')
+        elif self.beam_diameter != other_wavefront.beam_diameter:
+            raise Exception('Wavefronts must have same beam diameter')
+        elif self.wavelength != other_wavefront.wavelength:
+            raise Exception('Wavefronts must have same wavelengths')
+        else:
+            return CombinedWavefront(self.wavelength,
+                                     self.beam_diameter,
+                                     self.complex_amplitude - other_wavefront.complex_amplitude,
+                                     self.is_in_pupil_plane,
+                                     self.extent_pupil_plane_meters,
+                                     self.extent_focal_plane_dimensionless,
+                                     self.extent_focal_plane_meters,
+                                     self.grid_size,
+                                     self.has_fiber_been_applied,
+                                     self._x_map,
+                                     self._y_map)
+
+    @property
+    def aperture_radius(self) -> float:
+        """
+        Return the aperture radius.
+
+                Returns:
+                        Aperture radius
+        """
+        return self.beam_diameter / 2
+
+    @property
+    def amplitude(self) -> np.ndarray:
+        """
+        Return the amplitude of the complex amplitude.
+
+                Returns:
+                        Array containing amplitude
+        """
+        return abs(self.complex_amplitude)
+
+    @property
+    def phase(self) -> np.ndarray:
+        """
+        Return the phase of the complex amplitude.
+
+                Returns:
+                        Array containing phase
+        """
+        return np.angle(self.complex_amplitude)
+
+    @property
+    def intensity(self) -> np.ndarray:
+        """
+        Return the intensity of the complex amplitude.
+
+                Returns:
+                        Array containing intensity
+        """
+        return abs(self.complex_amplitude) ** 2
+
+    @staticmethod
+    def get_extent_pupil_plane_meters(beam_diameter: float):
+        """
+        Return a value corresponding to the full extent of the array in the pupil plane in units of meters.
+
+                Returns:
+                        Value corresponding to the full extent in meters
+        """
+        return beam_diameter
 
     @staticmethod
     def get_extent_focal_plane_dimensionless():
@@ -39,97 +164,106 @@ class BaseWavefront:
         """
         return BaseWavefront.get_extent_focal_plane_dimensionless() / beam_diameter * lens.focal_length * wavelength
 
-    def __init__(self):
+    def add_phase(self, phase: np.ndarray, normalize_intensity: bool = True):
         """
-        Constructor for base wavefront object.
-        """
-        self.wavelength = 0 * u.meter
-        self.beam_diameter = 0 * u.meter
-        self.complex_amplitude = None
-        self.is_in_pupil_plane = None
-        self.extent_pupil_plane_meters = None
-        self.extent_focal_plane_dimensionless = None
-        self.extent_focal_plane_meters = None  # Is reset to None after leaving the focal plane
-        self.number_of_pixels = 1
-        self.has_fiber_been_applied = None
-
-    def __add__(self, other_wavefront):
-        """
-        Method to add two base wavefront together.
+        Add a phase to the complex amplitude of the wavefront.
 
                 Parameters:
-                        other_wavefront: Base wavefront object to be added
-                Returns:
-                        Combined wavefront object
+                        phase: Array containing the phase profile
+                        normalize_intensity: Boolean indicating whether the intensity of the complex amplitude should
+                                             be normalized to unity after applying the phase
         """
-        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
-            raise Exception('Wavefronts must both be in pupil or in focal plane')
-        elif self.beam_diameter != other_wavefront.beam_diameter:
-            raise Exception('Wavefronts must have same beam diameter')
-        elif self.wavelength != other_wavefront.wavelength:
-            raise Exception('Wavefronts must have same wavelengths')
-        else:
-            return CombinedWavefront(self.wavelength,
-                                     self.beam_diameter,
-                                     self.complex_amplitude + other_wavefront.complex_amplitude,
-                                     self.is_in_pupil_plane,
-                                     self.extent_pupil_plane_meters,
-                                     self.extent_focal_plane_dimensionless,
-                                     self.extent_focal_plane_meters,
-                                     self.number_of_pixels,
-                                     self.has_fiber_been_applied)
-
-    def __sub__(self, other_wavefront):
-        """
-        Method to subtract one base wavefront from another.
-
-                Parameters:
-                        other_wavefront: Base wavefront object to be subtracted
-                Returns:
-                        Combined, i.e. subtracted, wavefront object
-        """
-        if self.is_in_pupil_plane != other_wavefront.is_in_pupil_plane:
-            raise Exception('Wavefronts must both be in pupil or in focal plane')
-        elif self.beam_diameter != other_wavefront.beam_diameter:
-            raise Exception('Wavefronts must have same beam diameter')
-        elif self.wavelength != other_wavefront.wavelength:
-            raise Exception('Wavefronts must have same wavelengths')
-        else:
-            return CombinedWavefront(self.wavelength,
-                                     self.beam_diameter,
-                                     self.complex_amplitude - other_wavefront.complex_amplitude,
-                                     self.is_in_pupil_plane,
-                                     self.extent_pupil_plane_meters,
-                                     self.extent_focal_plane_dimensionless,
-                                     self.extent_focal_plane_meters,
-                                     self.number_of_pixels,
-                                     self.has_fiber_been_applied)
-
-    @property
-    def phase(self) -> np.ndarray:
-        """
-        Return the phase of the complex amplitude.
-
-                Returns:
-                        Array containing phase
-        """
-        return np.angle(self.complex_amplitude)
-
-    @property
-    def intensity(self) -> np.ndarray:
-        """
-        Return the intensity of the complex amplitude.
-
-                Returns:
-                        Array containing intensity
-        """
-        return abs(self.complex_amplitude) ** 2
+        self.complex_amplitude *= np.exp(1j * phase)
+        if normalize_intensity:
+            self.complex_amplitude = get_normalized_intensity(self.complex_amplitude)
 
     def apply(self, optical_element: BaseOpticalElement):
         """
         Apply an optical element.
         """
         optical_element.apply(self)
+
+    def plot_phase(self, title=None):
+        """
+        Plot the wavefront phase.
+
+                Parameters:
+                        title: Optional title of the plot
+        """
+        plt.imshow(self.phase.value, cmap='bwr')
+        plt.colorbar()
+
+        if title is None:
+            plt.title('Wavefront Phase')
+        else:
+            plt.title(title)
+
+        plt.show()
+
+    def plot_intensity_pupil_plane(self, title=None):
+        """
+        Plot the wavefront intensity in the pupil plane with correct axis scaling.
+
+                Parameters:
+                        title: Optional title of the plot
+        """
+        if not self.is_in_pupil_plane:
+            raise Exception('Wavefront must be in pupil plane')
+
+        half_extent = self.extent_pupil_plane_meters.value / 2
+        plt.imshow(self.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent],
+                   norm=LogNorm(),
+                   cmap='gist_heat')
+
+        if title is None:
+            plt.title('Intensity Pupil Plane')
+        else:
+            plt.title(title)
+
+        colorbar = plt.colorbar()
+        colorbar.set_label('Intensity (W/m$^2$)')
+
+        plt.xlabel('Width (m)')
+        plt.ylabel('Height (m)')
+
+        plt.show()
+
+    def plot_intensity_focal_plane(self, title=None, dimensionless=False):
+        """
+        Plot the wavefront intensity in the focal plane with correct axis scaling.
+
+                Parameters:
+                        title: Optional title of the plot
+                        dimensionless: Boolean to specify whether to plot in units of meters or in dimensionless units
+        """
+        if self.is_in_pupil_plane:
+            raise Exception('Wavefront must be in focal plane')
+
+        if dimensionless:
+            half_extent = self.extent_focal_plane_dimensionless / 2
+        else:
+            half_extent = self.extent_focal_plane_meters.value / 2
+
+        plt.imshow(self.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent],
+                   norm=LogNorm(),
+                   cmap='gist_heat')
+
+        if title is None:
+            plt.title('Intensity Focal Plane')
+        else:
+            plt.title(title)
+
+        if dimensionless:
+            plt.xlabel('Width ($\lambda/D$)')
+            plt.ylabel('Height ($\lambda/D$)')
+        else:
+            plt.xlabel('Width (m)')
+            plt.ylabel('Height (m)')
+
+        colorbar = plt.colorbar()
+        colorbar.set_label('Intensity (W/m$^2$)')  # TODO: check units
+
+        plt.show()
 
 
 class Wavefront(BaseWavefront):
@@ -139,9 +273,8 @@ class Wavefront(BaseWavefront):
 
     def __init__(self,
                  wavelength: float,
-                 zernike_modes: list,
                  beam_diameter: float,
-                 number_of_pixels: int):
+                 grid_size: int):
         """
         Constructor for wavefront object.
 
@@ -149,20 +282,20 @@ class Wavefront(BaseWavefront):
                         wavelength: Wavelength of the wavefront in meters
                         zernike_modes: List containing the zernike mode indices and their coefficients in meters
                         beam_diameter: Beam diameter in the aperture plane in meters
-                        number_of_pixels: Side length of the output array in pixels (1 pixel =^ 300 um)
+                        grid_size: Side length of the output array in pixels (1 pixel =^ 300 um)
         """
         BaseWavefront.__init__(self)
         self.wavelength = wavelength
-        self.zernike_modes = zernike_modes
         self.beam_diameter = beam_diameter
-        self.number_of_pixels = number_of_pixels
+        self.grid_size = grid_size
 
-        self.extent_pupil_plane_meters = self.beam_diameter
+        self.extent_pupil_plane_meters = self.get_extent_pupil_plane_meters(self.beam_diameter)
         self.extent_focal_plane_dimensionless = self.get_extent_focal_plane_dimensionless()
-        self.aperture_function = self.get_aperture_function()
-        self.initial_wavefront_error = self.get_wavefront_error()
-        self.complex_amplitude = self.get_initial_complex_amplitude()
         self.is_in_pupil_plane = True
+
+        self._x_map, self._y_map = get_x_y_grid(self.grid_size, self.extent_pupil_plane_meters / 2)
+        self.complex_amplitude = get_normalized_intensity(
+            self.get_gaussian_beam_profile() * self.get_aperture_function() * u.watt ** 0.5 / u.meter)
 
     @property
     def wavelength(self) -> float:
@@ -203,23 +336,23 @@ class Wavefront(BaseWavefront):
         self._beam_diameter = value
 
     @property
-    def number_of_pixels(self) -> int:
+    def grid_size(self) -> int:
         """
-        Return the number of pixels.
+        Return the grid size.
 
                 Returns:
-                        Integer corresponding to the number of pixels
+                        Integer corresponding to the grid size
         """
-        return self._number_of_pixels
+        return self._grid_size
 
-    @number_of_pixels.setter
-    def number_of_pixels(self, value):
+    @grid_size.setter
+    def grid_size(self, value):
         """
-        Setter method for the number of pixels.
+        Setter method for the grid size.
         """
         if not (type(value) == int and value > 0 and value % 2 == 1):
-            raise ValueError(f'Number of pixels must be an odd, positive integer.')
-        self._number_of_pixels = value
+            raise ValueError(f'Grid size must be an odd, positive integer.')
+        self._grid_size = value
 
     def get_aperture_function(self) -> np.ndarray:
         """
@@ -228,52 +361,16 @@ class Wavefront(BaseWavefront):
                 Returns:
                         Array containing circular aperture.
         """
-        extent = self.extent_pupil_plane_meters / 2
-        extent_linear_space = np.linspace(-extent, extent, self.number_of_pixels)
-        self._x_map, self._y_map = np.meshgrid(extent_linear_space, extent_linear_space)
-        self._aperture_radius = self.beam_diameter / 2
+        return (self._x_map ** 2 + self._y_map ** 2 < self.aperture_radius ** 2).astype(complex)
 
-        return 1 * u.watt ** 0.5 / u.meter * (
-                self._x_map ** 2 + self._y_map ** 2 < self._aperture_radius ** 2).astype(
-            complex)
-
-    def get_wavefront_error(self) -> np.ndarray:
+    def get_gaussian_beam_profile(self) -> np.ndarray:
         """
-        Return a wavefront error composed of a sum of several Zernike polynomial terms Z_j.
+        Return an array containing a Gaussian beam profile.
 
                 Returns:
-                        Array containing wavefront error
+                        Array containing the Gaussian beam profile.
         """
-        if self.zernike_modes is None:
-            return 0 * u.meter
-
-        radial_map = np.sqrt(self._x_map ** 2 + self._y_map ** 2)
-        angular_map = np.arctan2(self._y_map, self._x_map)
-
-        wavefront_error = 0
-        for element in self.zernike_modes:
-            zernike_mode_index = element[0]
-            mode_coefficient = element[1]
-            wavefront_error += mode_coefficient * get_zernike_polynomial(zernike_mode_index, radial_map, angular_map,
-                                                                         self._aperture_radius)
-
-        return wavefront_error
-
-    def get_initial_complex_amplitude(self) -> np.ndarray:
-        """
-        Return an array containing the complex amplitude of the wavefront.
-
-                Returns:
-                        Array containing the complex amplitude.
-        """
-        gaussian_intensity_profile = np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self._aperture_radius) ** 2)
-
-        complex_amplitude = gaussian_intensity_profile * self.aperture_function * np.exp(
-            2 * np.pi * 1j * self.initial_wavefront_error / self.wavelength)
-
-        normalization_constant = 1 / np.sqrt(np.sum(abs(complex_amplitude) ** 2))
-
-        return normalization_constant * complex_amplitude * u.watt ** 0.5 / u.meter
+        return np.exp(-(self._x_map ** 2 + self._y_map ** 2) / (self.aperture_radius) ** 2)
 
 
 class CombinedWavefront(BaseWavefront):
@@ -289,8 +386,10 @@ class CombinedWavefront(BaseWavefront):
                  extent_pupil_plane_meters: float,
                  extent_focal_plane_dimensionless: float,
                  extent_focal_plane_meters: float,
-                 number_of_pixels: int,
-                 has_fiber_been_applied: bool):
+                 grid_size: int,
+                 has_fiber_been_applied: bool,
+                 _x_map: np.ndarray,
+                 _y_map: np.ndarray):
         """
         Constructor for combined wavefront object.
 
@@ -302,8 +401,10 @@ class CombinedWavefront(BaseWavefront):
                         extent_pupil_plane_meters: Full array width in pupil plane in meters
                         extent_focal_plane_dimensionless: Full array width in focal plane dimensionless
                         extent_focal_plane_meters: Full array width in focal plane in meters
-                        number_of_pixels: Number of pixels in array
+                        grid_size: Grid size of array
                         has_fiber_been_applied: Boolean specifying whether a fiber has been applied
+                        _x_map: X coordinate map of grid
+                        _y_map: Y coordinate map of grid
         """
         self.wavelength = wavelength
         self.beam_diameter = beam_diameter
@@ -312,5 +413,7 @@ class CombinedWavefront(BaseWavefront):
         self.extent_pupil_plane_meters = extent_pupil_plane_meters
         self.extent_focal_plane_dimensionless = extent_focal_plane_dimensionless
         self.extent_focal_plane_meters = extent_focal_plane_meters
-        self.number_of_pixels = number_of_pixels
+        self.grid_size = grid_size
         self.has_fiber_been_applied = has_fiber_been_applied
+        self._x_map = _x_map
+        self._y_map = _y_map

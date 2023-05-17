@@ -51,12 +51,12 @@ class Lens(BaseOpticalElement):
         # TODO: double check if phase behaviour is correct after lens transforms
         if wavefront.is_in_pupil_plane:
             wavefront.complex_amplitude = get_2d_chirp_z_transform(wavefront.complex_amplitude,
-                                                                   wavefront.number_of_pixels,
+                                                                   wavefront.grid_size,
                                                                    BaseWavefront._chirp_z_maximum_frequency) \
                                           * wavefront.complex_amplitude.unit
 
-            # Normalize by number of pixels to make independent of amount of pixels
-            wavefront.complex_amplitude /= wavefront.number_of_pixels
+            # Normalize by grid size to make independent of amount of pixels
+            wavefront.complex_amplitude /= wavefront.grid_size
 
             wavefront.is_in_pupil_plane = False
             wavefront.extent_focal_plane_meters = wavefront.get_extent_focal_plane_meters(wavefront.wavelength,
@@ -66,8 +66,8 @@ class Lens(BaseOpticalElement):
             raise Exception('Currently, lenses can only be applied to wavefronts in the pupil plane')
             # wavefront.complex_amplitude = fftshift(ifft2(ifftshift(wavefront.complex_amplitude)))
             #
-            # # Normalize by number of pixels to make independent of amount of pixels
-            # wavefront.complex_amplitude *= wavefront.number_of_pixels
+            # # Normalize by grid size to make independent of amount of pixels
+            # wavefront.complex_amplitude *= wavefront.grid_size
             # if wavefront.has_fiber_been_applied:
             #     wavefront.has_fiber_been_applied = None
             #

@@ -1,38 +1,40 @@
 from astropy import units as u
 
 from pywavefilters.optical_elements.filter.pinhole import Pinhole
-from pywavefilters.optical_elements.lens import Lens
-from pywavefilters.util.plot import plot_intensity_pupil_plane, plot_intensity_focal_plane, \
-    plot_initial_wavefront_error
+from pywavefilters.optical_elements.general.lens import Lens
+from pywavefilters.wavefronts.errors.power_spectral_density import get_power_spectral_density_error
+from pywavefilters.wavefronts.errors.zernike import get_zernike_error
 from pywavefilters.wavefronts.wavefront import Wavefront
 
-# Define wavefront
+# Parameters
+grid_size = 401
 wavelength = 1e-5 * u.meter
-zernike_modes = [(6, wavelength / 10)]
 beam_diameter = 0.003 * u.meter
-number_of_pixels = 201
+zernike_modes = [(6, wavelength / 10)]
 
-wavefront = Wavefront(wavelength,
-                      zernike_modes,
-                      beam_diameter,
-                      number_of_pixels)
+# Define wavefront
+wavefront = Wavefront(wavelength, beam_diameter, grid_size)
+
+# Add phase errors
+phase_error_zernike = get_zernike_error(wavelength, beam_diameter, zernike_modes, grid_size)
+wavefront.add_phase(phase_error_zernike)
+
+phase_error_psd = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 10, grid_size)
+wavefront.add_phase(phase_error_psd)
 
 # Define optical elements
 focal_length = 0.008 * u.meter
-
 lens = Lens(focal_length)
+pinhole = Pinhole(1.22, beam_diameter, grid_size)
 
-pinhole = Pinhole(1.22, beam_diameter, number_of_pixels)
+# Plot wavefront in input plane
+wavefront.plot_phase()
+wavefront.plot_intensity_pupil_plane()
 
-# Apply optical elements to wavefront and plot at each stage
-plot_initial_wavefront_error(wavefront)
-
-plot_intensity_pupil_plane(wavefront)
-
+# Apply lens
 wavefront.apply(lens)
+wavefront.plot_intensity_focal_plane(dimensionless=True)
 
-plot_intensity_focal_plane(wavefront, dimensionless=True)
-
+# Apply pinhole
 wavefront.apply(pinhole)
-
-plot_intensity_focal_plane(wavefront, dimensionless=True, title='Intensity Focal Plane After Pinhole')
+wavefront.plot_intensity_focal_plane(dimensionless=True, title='Intensity Focal Plane After Pinhole')

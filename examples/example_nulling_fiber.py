@@ -2,26 +2,35 @@ import numpy as np
 from astropy import units as u
 
 from pywavefilters.optical_elements.filter.fiber import Fiber
-from pywavefilters.optical_elements.lens import Lens
-from pywavefilters.optical_elements.phase_shifter import PhaseShifter
+from pywavefilters.optical_elements.general.lens import Lens
+from pywavefilters.optical_elements.general.phase_shifter import PhaseShifter
+from pywavefilters.wavefronts.errors.power_spectral_density import get_power_spectral_density_error
+from pywavefilters.wavefronts.errors.zernike import get_zernike_error
 from pywavefilters.wavefronts.wavefront import Wavefront
 
-# Define wavefront
+# Parameters
+grid_size = 401
 wavelength = 15e-6 * u.meter
-zernike_modes_1 = [(5, wavelength / 100)]
-zernike_modes_2 = [(6, wavelength / 200)]
 beam_diameter = 0.003 * u.meter
-number_of_pixels = 401
+zernike_modes_1 = [(5, wavelength / 100)]
+zernike_modes_2 = [(6, wavelength / 100)]
 
-wavefront_1 = Wavefront(wavelength,
-                        zernike_modes_1,
-                        beam_diameter,
-                        number_of_pixels)
+# Define wavefront
+wavefront_1 = Wavefront(wavelength, beam_diameter, grid_size)
+wavefront_2 = Wavefront(wavelength, beam_diameter, grid_size)
 
-wavefront_2 = Wavefront(wavelength,
-                        zernike_modes_2,
-                        beam_diameter,
-                        number_of_pixels)
+# Add phase errors
+phase_error_zernike_1 = get_zernike_error(wavelength, beam_diameter, zernike_modes_1, grid_size)
+wavefront_1.add_phase(phase_error_zernike_1)
+
+phase_error_psd_1 = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 100, grid_size)
+wavefront_1.add_phase(phase_error_psd_1)
+
+phase_error_zernike_2 = get_zernike_error(wavelength, beam_diameter, zernike_modes_2, grid_size)
+wavefront_2.add_phase(phase_error_zernike_2)
+
+phase_error_psd_2 = get_power_spectral_density_error(wavelength, beam_diameter, wavelength / 100, grid_size)
+wavefront_2.add_phase(phase_error_psd_2)
 
 # Define optical elements
 focal_length = 0.074 * u.meter
@@ -32,7 +41,7 @@ fiber = Fiber(wavelength,
               2 * 170e-6 * u.meter,
               2.7,
               2.6987,
-              number_of_pixels,
+              grid_size,
               lens)
 
 # Transform to focal plane and apply fibers
@@ -54,8 +63,8 @@ wavefront_const = wavefront_1 + wavefront_2
 wavefront_dest = wavefront_1 - wavefront_2
 
 # Calculate null depth and throughput
-null_depth = np.sum(wavefront_dest.intensity) / np.sum(wavefront_const.intensity)
 intensity_filtered = wavefront_const.intensity
+null_depth = np.sum(wavefront_dest.intensity) / np.sum(wavefront_const.intensity)
 throughput = np.sum(intensity_filtered) / np.sum(intensity_unfiltered)
 
 print(np.sum(intensity_unfiltered))
