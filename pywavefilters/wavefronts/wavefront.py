@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import LogNorm
 
 from pywavefilters.optical_elements.optical_element import BaseOpticalElement
-from pywavefilters.util.math import get_normalized_intensity, get_x_y_grid
+from pywavefilters.util.math import get_normalized_intensity, get_x_y_grid, get_aperture_function
 
 
 class BaseWavefront:
@@ -164,18 +164,14 @@ class BaseWavefront:
         """
         return BaseWavefront.get_extent_focal_plane_dimensionless() / beam_diameter * lens.focal_length * wavelength
 
-    def add_phase(self, phase: np.ndarray, normalize_intensity: bool = True):
+    def add_phase(self, phase: np.ndarray):
         """
         Add a phase to the complex amplitude of the wavefront.
 
                 Parameters:
                         phase: Array containing the phase profile
-                        normalize_intensity: Boolean indicating whether the intensity of the complex amplitude should
-                                             be normalized to unity after applying the phase
         """
         self.complex_amplitude *= np.exp(1j * phase)
-        if normalize_intensity:
-            self.complex_amplitude = get_normalized_intensity(self.complex_amplitude)
 
     def apply(self, optical_element: BaseOpticalElement):
         """
@@ -295,7 +291,8 @@ class Wavefront(BaseWavefront):
 
         self._x_map, self._y_map = get_x_y_grid(self.grid_size, self.extent_pupil_plane_meters / 2)
         self.complex_amplitude = get_normalized_intensity(
-            self.get_gaussian_beam_profile() * self.get_aperture_function() * u.watt ** 0.5 / u.meter)
+            self.get_gaussian_beam_profile() * get_aperture_function(self._x_map, self._y_map,
+                                                                     self.aperture_radius) * u.watt ** 0.5 / u.meter)
 
     @property
     def wavelength(self) -> float:
@@ -353,15 +350,6 @@ class Wavefront(BaseWavefront):
         if not (type(value) == int and value > 0 and value % 2 == 1):
             raise ValueError(f'Grid size must be an odd, positive integer.')
         self._grid_size = value
-
-    def get_aperture_function(self) -> np.ndarray:
-        """
-        Return an array containing a circular aperture.
-
-                Returns:
-                        Array containing circular aperture.
-        """
-        return (self._x_map ** 2 + self._y_map ** 2 < self.aperture_radius ** 2).astype(complex)
 
     def get_gaussian_beam_profile(self) -> np.ndarray:
         """

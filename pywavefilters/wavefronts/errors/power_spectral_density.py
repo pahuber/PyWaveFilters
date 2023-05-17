@@ -1,3 +1,5 @@
+from typing import Union
+
 import numpy as np
 from astropy import units as u
 from numpy.fft import fft2
@@ -56,6 +58,7 @@ def get_power_spectral_density_error(wavelength: float,
                                      rms: float,
                                      grid_size: int,
                                      # low_spatial_frequency_power: float = 1,
+                                     seed: Union[int, None] = None,
                                      correlation_length: float = 212.26 / u.meter,
                                      power_law_falloff: float = 7.8,
                                      rotation_angle: float = 0,
@@ -82,6 +85,8 @@ def get_power_spectral_density_error(wavelength: float,
     power_spectral_density_map[grid_size // 2, grid_size // 2] = 0
 
     # Generate random phase between -pi and pi
+    if seed is not None:
+        np.random.seed(seed)
     phase = 2 * np.pi * np.random.uniform(size=(grid_size, grid_size)) - np.pi
 
     # Calculate Fourier transform
@@ -93,9 +98,14 @@ def get_power_spectral_density_error(wavelength: float,
 
     # Fix RMS to match expected value from PSD
     error_map = error_map / np.sqrt(np.mean(np.square(error_map))) * rms
+    # print(get_root_mean_square(error_map))
 
     # Convert to radians
     error_map = 2 * np.pi * error_map / wavelength
+
+    # error_map = np.exp(1j * error_map)
+
+    # print(get_root_mean_square(np.angle(error_map) * wavelength / (2 * np.pi)))
 
     # rms = np.sqrt(np.mean(np.square(error_map)))
     # error_map *= (low_spatial_frequency_power / rms)
@@ -108,6 +118,9 @@ def get_power_spectral_density_error(wavelength: float,
     # error_map *= (low_spatial_frequency_power / rms_error_map)
     error_map = prop_shift_center(error_map)
 
+    # print(get_root_mean_square(np.angle(error_map) * wavelength / (2 * np.pi)))
+    # print('--')
+
     # TODO: check implementation with RMS and units
 
     return error_map
@@ -115,3 +128,4 @@ def get_power_spectral_density_error(wavelength: float,
 
 def get_true_power_spectral_density_distribution(power_spectral_density_error: np.ndarray):
     pass
+# TODO: check profile for error map with circular aperture overlay

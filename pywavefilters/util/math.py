@@ -32,6 +32,22 @@ def get_x_y_grid(grid_size: int, extent: float) -> np.ndarray:
     return np.meshgrid(extent_linear_space, extent_linear_space)
 
 
+def get_aperture_function(x_coordinate_map: np.ndarray, y_coordinate_map: np.ndarray,
+                          aperture_radius: float) -> np.ndarray:
+    """
+    Return an array containing a circular aperture.
+
+            Parameters:
+                    x_coordinate_map: X-coordinates
+                    y_coordinate_map: Y-coordinates
+                    aperture_radius: Aperture radius
+
+            Returns:
+                    Array containing circular aperture.
+    """
+    return (x_coordinate_map ** 2 + y_coordinate_map ** 2 < aperture_radius ** 2).astype(complex)
+
+
 def get_root_mean_square(array: np.ndarray) -> float:
     """
     Method to calculate the root mean square (RMS) of an array.
