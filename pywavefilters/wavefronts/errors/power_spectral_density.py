@@ -4,6 +4,9 @@ import numpy as np
 from astropy import units as u
 from numpy.fft import fft2
 
+from pywavefilters.util.math import get_aperture_function, get_x_y_grid
+from pywavefilters.wavefronts.wavefront import BaseWavefront
+
 
 def prop_shift_center(image):
     """Shift a n by n image by (x,y)=(n/2,n/2), either shifting from the image
@@ -90,13 +93,16 @@ def get_power_spectral_density_error(wavelength: float,
     phase = 2 * np.pi * np.random.uniform(size=(grid_size, grid_size)) - np.pi
 
     # Calculate Fourier transform
-    error_map = fft2(prop_shift_center(
-        np.sqrt(power_spectral_density_map) / spatial_frequency_diameter * np.exp(1j * phase))) / np.size(
+    error_map = (fft2((prop_shift_center(
+        np.sqrt(power_spectral_density_map) / spatial_frequency_diameter * np.exp(1j * phase))))) / np.size(
         power_spectral_density_map)
 
     error_map = error_map.real / (grid_size ** 2 * sampling ** 2)
 
     # Fix RMS to match expected value from PSD
+    x_map, y_map = get_x_y_grid(grid_size, BaseWavefront.get_extent_pupil_plane_meters(beam_diameter) / 2)
+    error_map *= get_aperture_function(x_map, y_map, beam_diameter / 2, is_real=True)
+
     error_map = error_map / np.sqrt(np.mean(np.square(error_map))) * rms
     # print(get_root_mean_square(error_map))
 
@@ -106,7 +112,7 @@ def get_power_spectral_density_error(wavelength: float,
     # error_map = np.exp(1j * error_map)
 
     # print(get_root_mean_square(np.angle(error_map) * wavelength / (2 * np.pi)))
-
+    #
     # rms = np.sqrt(np.mean(np.square(error_map)))
     # error_map *= (low_spatial_frequency_power / rms)
 
@@ -116,12 +122,9 @@ def get_power_spectral_density_error(wavelength: float,
     # rms_power_spectral_density = np.sqrt(np.sum(power_spectral_density_map)) * spatial_frequency_diameter
     # rms_error_map = np.std(error_map)
     # error_map *= (low_spatial_frequency_power / rms_error_map)
-    error_map = prop_shift_center(error_map)
+    # error_map = prop_shift_center(error_map)
 
-    # print(get_root_mean_square(np.angle(error_map) * wavelength / (2 * np.pi)))
-    # print('--')
-
-    # TODO: check implementation with RMS and units
+    # TODO: check implementation with RMS and units and shift center
 
     return error_map
 

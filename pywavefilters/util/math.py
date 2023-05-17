@@ -32,8 +32,10 @@ def get_x_y_grid(grid_size: int, extent: float) -> np.ndarray:
     return np.meshgrid(extent_linear_space, extent_linear_space)
 
 
-def get_aperture_function(x_coordinate_map: np.ndarray, y_coordinate_map: np.ndarray,
-                          aperture_radius: float) -> np.ndarray:
+def get_aperture_function(x_coordinate_map: np.ndarray,
+                          y_coordinate_map: np.ndarray,
+                          aperture_radius: float,
+                          is_real=False) -> np.ndarray:
     """
     Return an array containing a circular aperture.
 
@@ -41,10 +43,14 @@ def get_aperture_function(x_coordinate_map: np.ndarray, y_coordinate_map: np.nda
                     x_coordinate_map: X-coordinates
                     y_coordinate_map: Y-coordinates
                     aperture_radius: Aperture radius
+                    is_real: Boolean indicating whether to return a real or complex array
 
             Returns:
                     Array containing circular aperture.
     """
+    if is_real:
+        return (x_coordinate_map ** 2 + y_coordinate_map ** 2 < aperture_radius ** 2)
+
     return (x_coordinate_map ** 2 + y_coordinate_map ** 2 < aperture_radius ** 2).astype(complex)
 
 
