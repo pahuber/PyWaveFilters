@@ -22,17 +22,15 @@ wavefront_2 = Wavefront(wavelength, beam_diameter, grid_size)
 
 # Add phase errors
 phase_error_zernike_1 = get_zernike_error(wavelength, beam_diameter, zernike_modes_1, grid_size)
-wavefront_1.add_phase(phase_error_zernike_1)
-
 phase_error_psd_1 = get_power_spectral_density_error(wavelength, beam_diameter, rms, grid_size,
                                                      correlation_length=20000 / u.meter, plot_psd=False)
-wavefront_1.add_phase(phase_error_psd_1)
-
 phase_error_zernike_2 = get_zernike_error(wavelength, beam_diameter, zernike_modes_2, grid_size)
-wavefront_2.add_phase(phase_error_zernike_2)
-
 phase_error_psd_2 = get_power_spectral_density_error(wavelength, beam_diameter, rms, grid_size,
                                                      correlation_length=20000 / u.meter, plot_psd=False)
+
+wavefront_1.add_phase(phase_error_zernike_1)
+wavefront_1.add_phase(phase_error_psd_1)
+wavefront_2.add_phase(phase_error_zernike_2)
 wavefront_2.add_phase(phase_error_psd_2)
 
 # Define optical elements
