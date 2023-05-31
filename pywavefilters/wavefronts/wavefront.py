@@ -1,3 +1,5 @@
+from typing import Union
+
 import astropy
 import numpy as np
 from astropy import units as u
@@ -164,14 +166,22 @@ class BaseWavefront:
         """
         return BaseWavefront.get_extent_focal_plane_dimensionless() / beam_diameter * lens.focal_length * wavelength
 
-    def add_phase(self, phase: np.ndarray):
+    def add_phase(self, phase: Union[float, np.ndarray], grid_size: Union[int, None] = None):
         """
-        Add a phase to the complex amplitude of the wavefront.
+        Add a constant offset (piston) or two-dimensional array to the phase of the complex amplitude of the wavefront.
 
                 Parameters:
-                        phase: Array containing the phase profile
+                        phase: Float corresponding to a piston offset or array containing the phase profile to add
+                        grid_size: Grid size of the array; only needed if a constant piston offset is to be added
         """
-        self.complex_amplitude *= np.exp(1j * phase)
+        if isinstance(phase, float):
+            if grid_size is not None:
+                phase_array = np.ones((grid_size, grid_size)) * phase
+                self.complex_amplitude *= np.exp(1j * phase_array)
+            else:
+                raise Exception('A grid size must be provided to add a constant phase offset')
+        else:
+            self.complex_amplitude *= np.exp(1j * phase)
 
     def apply(self, optical_element: BaseOpticalElement):
         """
