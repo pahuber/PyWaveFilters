@@ -206,60 +206,36 @@ class BaseWavefront:
 
         plt.show()
 
-    def plot_intensity_pupil_plane(self, title=None):
-        """
-        Plot the wavefront intensity in the pupil plane with correct axis scaling.
-
-                Parameters:
-                        title: Optional title of the plot
-        """
-        if not self.is_in_pupil_plane:
-            raise Exception('Wavefront must be in pupil plane')
-
-        half_extent = self.extent_pupil_plane_meters.value / 2
-        plt.imshow(self.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent],
-                   norm=LogNorm(),
-                   cmap='gist_heat')
-
-        if title is None:
-            plt.title('Intensity Pupil Plane')
-        else:
-            plt.title(title)
-
-        colorbar = plt.colorbar()
-        colorbar.set_label('Intensity (W/m$^2$)')
-
-        plt.xlabel('Width (m)')
-        plt.ylabel('Height (m)')
-
-        plt.show()
-
-    def plot_intensity_focal_plane(self, title=None, dimensionless=False):
+    def plot_intensity(self, title=None, dimensionless=False):
         """
         Plot the wavefront intensity in the focal plane with correct axis scaling.
 
                 Parameters:
                         title: Optional title of the plot
-                        dimensionless: Boolean to specify whether to plot in units of meters or in dimensionless units
+                        dimensionless: Boolean to specify whether to plot in units of meters or in dimensionless units,
+                                       ignored if in the pupil plane
         """
         if self.is_in_pupil_plane:
-            raise Exception('Wavefront must be in focal plane')
-
-        if dimensionless:
-            half_extent = self.extent_focal_plane_dimensionless / 2
+            half_extent = self.extent_pupil_plane_meters.value / 2
+            title_standard = 'Intensity Pupil Plane'
         else:
-            half_extent = self.extent_focal_plane_meters.value / 2
+            title_standard = 'Intensity Focal Plane'
+
+            if dimensionless:
+                half_extent = self.extent_focal_plane_dimensionless / 2
+            else:
+                half_extent = self.extent_focal_plane_meters.value / 2
 
         plt.imshow(self.intensity.value, extent=[-half_extent, half_extent, -half_extent, half_extent],
                    norm=LogNorm(),
                    cmap='gist_heat')
 
         if title is None:
-            plt.title('Intensity Focal Plane')
+            plt.title(title_standard)
         else:
             plt.title(title)
 
-        if dimensionless:
+        if not self.is_in_pupil_plane and dimensionless:
             plt.xlabel('Width ($\lambda/D$)')
             plt.ylabel('Height ($\lambda/D$)')
         else:
